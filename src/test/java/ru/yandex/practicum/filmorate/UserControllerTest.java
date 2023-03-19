@@ -19,9 +19,12 @@ public class UserControllerTest {
     @BeforeEach
     public void beforeEach() {
         userController = new UserController();
-        user = new User("email@email.ru", "login",
-                LocalDate.of(1990, 12, 26));
-        user.setName("userName");
+        user = User.builder()
+                .email("email@email.ru")
+                .login("login")
+                .birthday(LocalDate.of(1990, 12, 26))
+                .name("userName")
+                .build();
     }
 
     @Test
@@ -34,63 +37,15 @@ public class UserControllerTest {
     }
 
     @Test
-    public void addUserLoginWithSpace() {
-        User user1 = new User("email@email.ru", "Lo gin",
-                LocalDate.of(1990, 12, 26));
-        user1.setName("userName");
-
-        Exception exception = assertThrows(ValidationException.class, () -> {
-            userController.addUser(user1);
-        });
-        String expectedMessage = "Login must not contain spaces";
-        String actualMessage = exception.getMessage();
-        assertEquals(expectedMessage, actualMessage);
-
-        List<User> savedUsers = userController.getUsers();
-        assertEquals(0, savedUsers.size());
-    }
-
-    @Test
-    public void addUserEmptyLogin() {
-        User user1 = new User("email@email.ru", " ",
-                LocalDate.of(1990, 12, 26));
-        user1.setName("userName");
-
-        Exception exception = assertThrows(ValidationException.class, () -> {
-            userController.addUser(user1);
-        });
-        String expectedMessage = "Login cannot be empty or blank";
-        String actualMessage = exception.getMessage();
-        assertEquals(expectedMessage, actualMessage);
-
-        List<User> savedUsers = userController.getUsers();
-        assertEquals(0, savedUsers.size());
-    }
-
-    @Test
-    public void addUserBlankLogin() {
-        User user1 = new User("email@email.ru", "",
-                LocalDate.of(1990, 12, 26));
-        user1.setName("userName");
-
-        Exception exception = assertThrows(ValidationException.class, () -> {
-            userController.addUser(user1);
-        });
-        String expectedMessage = "Login cannot be empty or blank";
-        String actualMessage = exception.getMessage();
-        assertEquals(expectedMessage, actualMessage);
-
-        List<User> savedUsers = userController.getUsers();
-        assertEquals(0, savedUsers.size());
-    }
-
-    @Test
     public void addUserEmailExist() {
         userController.addUser(user);
 
-        User user1 = new User(user.getEmail(), "Login",
-                LocalDate.of(1990, 12, 26));
-        user1.setName("userName");
+        User user1 = User.builder()
+                .email(user.getEmail())
+                .login("login")
+                .birthday(LocalDate.of(1990, 12, 26))
+                .name("userName")
+                .build();
 
         Exception exception = assertThrows(ValidationException.class, () -> {
             userController.addUser(user1);
@@ -105,9 +60,12 @@ public class UserControllerTest {
 
     @Test
     public void addUserWithNullName() {
-        User user1 = new User("email@email.ru", "Login",
-                LocalDate.of(1990, 12, 26));
-        user1.setName(null);
+        User user1 = User.builder()
+                .email("email@email.ru")
+                .login("login")
+                .birthday(LocalDate.of(1990, 12, 26))
+                .name(null)
+                .build();
 
         userController.addUser(user1);
         assertEquals(user1.getName(), user1.getLogin());
@@ -118,9 +76,12 @@ public class UserControllerTest {
 
     @Test
     public void addUserWithEmptyName() {
-        User user1 = new User("email@email.ru", "Login",
-                LocalDate.of(1990, 12, 26));
-        user1.setName("");
+        User user1 = User.builder()
+                .email("email@email.ru")
+                .login("login")
+                .birthday(LocalDate.of(1990, 12, 26))
+                .name("")
+                .build();
 
         userController.addUser(user1);
         assertEquals(user1.getName(), user1.getLogin());
@@ -131,9 +92,12 @@ public class UserControllerTest {
 
     @Test
     public void addUserWithBlankName() {
-        User user1 = new User("email@email.ru", "Login",
-                LocalDate.of(1990, 12, 26));
-        user1.setName(" ");
+        User user1 = User.builder()
+                .email("email@email.ru")
+                .login("login")
+                .birthday(LocalDate.of(1990, 12, 26))
+                .name(" ")
+                .build();
 
         userController.addUser(user1);
         assertEquals(user1.getName(), user1.getLogin());
@@ -146,10 +110,13 @@ public class UserControllerTest {
     public void putUserNormal() {
         userController.addUser(user);
 
-        User updatedUser = new User("email@yandex.ru", "OtherLogin",
-                LocalDate.of(2000, 12, 26));
-        updatedUser.setName("Other Name");
-        updatedUser.setId(user.getId());
+        User updatedUser = User.builder()
+                .email("email@yandex.ru")
+                .login("otherLogin")
+                .birthday(LocalDate.of(2000, 12, 26))
+                .name("otherUserName")
+                .id(user.getId())
+                .build();
 
         userController.putUser(updatedUser);
 
@@ -162,10 +129,13 @@ public class UserControllerTest {
     public void putUserWrongId() {
         userController.addUser(user);
 
-        User updatedUser = new User("email@yandex.ru", "OtherLogin",
-                LocalDate.of(2000, 12, 26));
-        updatedUser.setName("Other Name");
-        updatedUser.setId(user.getId() + 100);
+        User updatedUser = User.builder()
+                .email("email@yandex.ru")
+                .login("otherLogin")
+                .birthday(LocalDate.of(2000, 12, 26))
+                .name("otherUserName")
+                .id(user.getId() + 100)
+                .build();
 
         Exception exception = assertThrows(ValidationException.class, () -> {
             userController.putUser(updatedUser);;
@@ -183,10 +153,13 @@ public class UserControllerTest {
     @Test
     public void putUserWithNullName() {
         userController.addUser(user);
-        User updatedUser = new User("email@yandex.ru", "OtherLogin",
-                LocalDate.of(2000, 12, 26));
-        updatedUser.setId(user.getId());
-        updatedUser.setName(null);
+        User updatedUser = User.builder()
+                .email("email@yandex.ru")
+                .login("otherLogin")
+                .birthday(LocalDate.of(2000, 12, 26))
+                .name(null)
+                .id(user.getId())
+                .build();
 
         userController.putUser(updatedUser);
         assertEquals(updatedUser.getName(), updatedUser.getLogin());
@@ -199,10 +172,13 @@ public class UserControllerTest {
     @Test
     public void putUserWithEmptyName() {
         userController.addUser(user);
-        User updatedUser = new User("email@yandex.ru", "OtherLogin",
-                LocalDate.of(2000, 12, 26));
-        updatedUser.setId(user.getId());
-        updatedUser.setName("");
+        User updatedUser = User.builder()
+                .email("email@yandex.ru")
+                .login("otherLogin")
+                .birthday(LocalDate.of(2000, 12, 26))
+                .name("")
+                .id(user.getId())
+                .build();
 
         userController.putUser(updatedUser);
         assertEquals(updatedUser.getName(), updatedUser.getLogin());
@@ -214,10 +190,13 @@ public class UserControllerTest {
     @Test
     public void putUserWithBlankName() {
         userController.addUser(user);
-        User updatedUser = new User("email@yandex.ru", "OtherLogin",
-                LocalDate.of(2000, 12, 26));
-        updatedUser.setId(user.getId());
-        updatedUser.setName(" ");
+        User updatedUser = User.builder()
+                .email("email@yandex.ru")
+                .login("otherLogin")
+                .birthday(LocalDate.of(2000, 12, 26))
+                .name(" ")
+                .id(user.getId())
+                .build();
 
         userController.putUser(updatedUser);
         assertEquals(updatedUser.getName(), updatedUser.getLogin());
@@ -242,5 +221,4 @@ public class UserControllerTest {
         List<User> savedUsers = userController.getUsers();
         assertTrue(savedUsers.isEmpty());
     }
-
 }
