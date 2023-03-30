@@ -38,4 +38,10 @@ public class UserController {
         log.info("Currently {} users registered.", users.size());
         return users;
     }
+
+    @GetMapping("/{userId}")
+    public User findUser(@PathVariable Integer userId) {
+        log.info("Looking for user: {}", userId);
+        return userStorage.findUser(userId);
+    }
 }
