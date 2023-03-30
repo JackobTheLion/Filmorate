@@ -5,6 +5,7 @@ import lombok.Data;
 
 import javax.validation.constraints.*;
 import java.time.LocalDate;
+import java.util.Set;
 
 @Data
 @Builder
@@ -18,4 +19,13 @@ public class User {
     private String name;
     @Past
     private final LocalDate birthday;
+    private final Set<Integer> friends;
+
+    public boolean addFriend(Integer id) {
+        return friends.add(id);
+    }
+
+    public boolean deleteFriend(Integer id) {
+        return friends.remove(id);
+    }
 }
