@@ -6,13 +6,14 @@ import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.controller.FilmController;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static ru.yandex.practicum.filmorate.controller.FilmController.MIN_RELEASE_DATE;
+import static ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage.MIN_RELEASE_DATE;
 
 public class FilmControllerTest {
     FilmController filmController;
@@ -20,7 +21,7 @@ public class FilmControllerTest {
 
     @BeforeEach
     public void beforeEach() {
-        filmController = new FilmController();
+        filmController = new FilmController(new InMemoryFilmStorage());
         film = Film.builder()
                 .name("Крепкий орешек")
                 .description("Крутой боевик с Брюсом Уиллисом")
