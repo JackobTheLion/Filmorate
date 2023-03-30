@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.controller.UserController;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -18,7 +19,7 @@ public class UserControllerTest {
 
     @BeforeEach
     public void beforeEach() {
-        userController = new UserController();
+        userController = new UserController(new InMemoryUserStorage());
         user = User.builder()
                 .email("email@email.ru")
                 .login("login")
