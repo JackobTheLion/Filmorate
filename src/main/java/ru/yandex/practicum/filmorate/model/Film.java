@@ -5,12 +5,13 @@ import lombok.Data;
 
 import javax.validation.constraints.*;
 import java.time.LocalDate;
+import java.util.Set;
 
 @Data
 @Builder
 public class Film {
 
-    private int id;
+    private long id;
     @NotBlank
     private final String name;
     @Size(min = 1, max = 200)
@@ -19,4 +20,13 @@ public class Film {
     private final LocalDate releaseDate;
     @Min(1)
     private final long duration;
+    private final Set<Long> likes;
+
+    public boolean addLike(Long id) {
+        return likes.add(id);
+    }
+
+    public boolean removeLike(Long id) {
+        return likes.remove(id);
+    }
 }

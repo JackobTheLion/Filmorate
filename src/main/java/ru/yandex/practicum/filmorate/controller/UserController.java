@@ -44,7 +44,7 @@ public class UserController {
     }
 
     @GetMapping("/{userId}")
-    public User findUser(@PathVariable Integer userId) {
+    public User findUser(@PathVariable Long userId) {
         log.info("Looking for user: {}", userId);
         return userStorage.findUser(userId);
     }

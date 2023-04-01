@@ -13,9 +13,9 @@ import java.util.stream.Collectors;
 @Slf4j
 public class InMemoryUserStorage implements UserStorage{
 
-    private final Map<Integer, User> users = new HashMap<>();
+    private final Map<Long, User> users = new HashMap<>();
     private final Set<String> userEmails = new HashSet<>();
-    private int id = 0;
+    private long id = 0;
     @Override
     public User addUser(User user) {
         log.info("Trying to add user: {}", user);
@@ -58,7 +58,7 @@ public class InMemoryUserStorage implements UserStorage{
     }
 
     @Override
-    public User findUser(Integer id) {
+    public User findUser(Long id) {
         log.info("Looking for user with id: {}", id);
         User userFound = users.get(id);
         if(userFound == null) {
@@ -70,7 +70,7 @@ public class InMemoryUserStorage implements UserStorage{
     }
 
     @Override
-    public User deleteUser(Integer id) {
+    public User deleteUser(Long id) {
         log.info("Deleting for user with id: {}", id);
         User userFound = users.remove(id);
         if(userFound == null) {

@@ -10,7 +10,7 @@ import java.util.Set;
 @Data
 @Builder
 public class User {
-    private int id;
+    private long id;
     @Email
     @NotNull
     private final String email;
@@ -19,13 +19,13 @@ public class User {
     private String name;
     @Past
     private final LocalDate birthday;
-    private final Set<Integer> friends;
+    private final Set<Long> friends;
 
-    public boolean addFriend(Integer id) {
+    public boolean addFriend(Long id) {
         return friends.add(id);
     }
 
-    public boolean deleteFriend(Integer id) {
+    public boolean deleteFriend(Long id) {
         return friends.remove(id);
     }
 }

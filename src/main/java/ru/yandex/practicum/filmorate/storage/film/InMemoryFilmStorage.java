@@ -6,18 +6,17 @@ import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 @Slf4j
 public class InMemoryFilmStorage implements FilmStorage{
 
-    private final Map<Integer, Film> films = new HashMap<>();
+    private final Map<Long, Film> films = new HashMap<>();
+    private final Set<Film> topFilms = new TreeSet<>(Comparator.comparing(film -> film.getLikes().size()));
     public static final LocalDate MIN_RELEASE_DATE = LocalDate.of(1895, 12, 28);
-    private int id = 0;
+    private long id = 0;
     @Override
     public Film addFilm(Film film) {
         if (film.getReleaseDate().isBefore(MIN_RELEASE_DATE)) {
@@ -32,6 +31,7 @@ public class InMemoryFilmStorage implements FilmStorage{
         id++;
         film.setId(id);
         films.put(id, film);
+        topFilms.add(film);
         log.info("Film added: {}", film);
         return film;
     }
@@ -48,12 +48,14 @@ public class InMemoryFilmStorage implements FilmStorage{
             throw new ValidationException("Film with id " + film.getId() + " does not exist");
         }
         films.put(film.getId(), film);
+        topFilms.removeIf(f -> f.getId() == film.getId());
+        topFilms.add(film);
         log.info("Film updated: {}", film);
         return film;
     }
 
     @Override
     public List<Film> getFilms() {
-        return new ArrayList<>(films.values());
+        return new ArrayList<>(topFilms);
     }
 }
