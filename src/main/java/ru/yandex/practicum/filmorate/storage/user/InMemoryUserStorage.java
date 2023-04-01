@@ -7,6 +7,7 @@ import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 @Slf4j
@@ -76,6 +77,7 @@ public class InMemoryUserStorage implements UserStorage{
             log.info("User with id {} cannot be deleted. User does not exist.", id);
             throw new UserNotFoundException(String.format("User with id %s cannot be deleted. User does not exist.", id));
         }
+        users.values().forEach(user -> user.getFriends().remove(userFound.getId()));
         log.info("User deleted: {}", userFound);
         return userFound;
     }
