@@ -9,5 +9,4 @@ public interface UserStorage {
     User putUser(User user);
     List<User> getUsers();
     User findUser(Long id);
-    User deleteUser(Long id);
 }

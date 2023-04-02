@@ -68,17 +68,4 @@ public class InMemoryUserStorage implements UserStorage{
         log.info("User found: {}", userFound);
         return userFound;
     }
-
-    @Override
-    public User deleteUser(Long id) {
-        log.info("Deleting for user with id: {}", id);
-        User userFound = users.remove(id);
-        if(userFound == null) {
-            log.info("User with id {} cannot be deleted. User does not exist.", id);
-            throw new UserNotFoundException(String.format("User with id %s cannot be deleted. User does not exist.", id));
-        }
-        users.values().forEach(user -> user.getFriends().remove(userFound.getId()));
-        log.info("User deleted: {}", userFound);
-        return userFound;
-    }
 }

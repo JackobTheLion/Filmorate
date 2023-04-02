@@ -20,21 +20,25 @@ public class FilmService {
         this.filmStorage = filmStorage;
     }
 
-    public Film addLike(Film film, User user) {
-        log.info("Adding like from id {} to film {}", user.getId(), film);
-        if(!film.getLikes().add(user.getId())) {
-            log.info("Like from id {} to film {} already exist", user.getId(), film);
+    public Film addLike(Long filmId, Long userId) {
+        log.info("Adding like from id {} to film id {}", userId, filmId);
+        Film film = filmStorage.findFilm(filmId);
+        if(!film.getLikes().add(userId)) {
+            log.info("Like from id {} to film id {} already exist", userId, filmId);
+            return film;
         }
-        log.info("Like from id {} to film {} added", user.getId(), film);
+        log.info("Like from id {} to film {} added", userId, filmId);
         return film;
     }
 
-    public Film removeLike(Film film, User user) {
-        log.info("Removing like from id {} to film {}", user.getId(), film);
-        if(!film.getLikes().remove(user.getId())) {
-            log.info("Like from id {} to film {} does not exist", user.getId(), film);
+    public Film removeLike(Long filmId, Long userId) {
+        log.info("Removing like from user id {} to film id {}", userId, filmId);
+        Film film = filmStorage.findFilm(filmId);
+        if(!film.getLikes().remove(userId)) {
+            log.info("Like from id {} to film id {} does not exist", userId, filmId);
+            return film;
         }
-        log.info("Like from id {} to film {} removed", user.getId(), film);
+        log.info("Like from id {} to film {} removed", userId, filmId);
         return film;
     }
 
