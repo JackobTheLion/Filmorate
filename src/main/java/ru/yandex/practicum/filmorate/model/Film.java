@@ -21,12 +21,4 @@ public class Film {
     @Min(1)
     private final long duration;
     private final Set<Long> likes;
-
-    public boolean addLike(Long id) {
-        return likes.add(id);
-    }
-
-    public boolean removeLike(Long id) {
-        return likes.remove(id);
-    }
 }

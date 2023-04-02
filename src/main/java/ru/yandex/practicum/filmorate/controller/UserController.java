@@ -48,4 +48,28 @@ public class UserController {
         log.info("Looking for user: {}", userId);
         return userStorage.findUser(userId);
     }
+
+    @PutMapping("/{userId}/friends/{friendId}")
+    public User addFriend(@PathVariable Long userId, @PathVariable Long friendId) {
+        log.info("Making friends id {} and {}", userId, friendId);
+        return userService.addFriend(userId, friendId);
+    }
+
+    @DeleteMapping("/{userId}/friends/{friendId}")
+    public User deleteFriend(@PathVariable Long userId, @PathVariable Long friendId) {
+        log.info("Deleting friends id {} and {}", userId, friendId);
+        return userService.deleteFriend(userId, friendId);
+    }
+
+    @GetMapping("{id}/friends")
+    public List<User> getFriends(@PathVariable Long id) {
+        log.info("Looking for friend of Id: {}", id);
+        return userService.getFriends(id);
+    }
+
+    @GetMapping("/{id}/friends/common/{otherId}")
+    public List<User> getCommonFriends(@PathVariable Long id, @PathVariable Long otherId) {
+        log.info("Looking for common friends for {}  and {}", id, otherId);
+        return userService.getCommonFriends(id, otherId);
+    }
 }

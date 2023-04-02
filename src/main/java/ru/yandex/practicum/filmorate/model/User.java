@@ -20,12 +20,4 @@ public class User {
     @Past
     private final LocalDate birthday;
     private final Set<Long> friends;
-
-    public boolean addFriend(Long id) {
-        return friends.add(id);
-    }
-
-    public boolean deleteFriend(Long id) {
-        return friends.remove(id);
-    }
 }
