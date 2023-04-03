@@ -161,7 +161,7 @@ public class UserControllerTest {
                 .build();
 
         Exception exception = assertThrows(UserNotFoundException.class, () -> {
-            userController.putUser(updatedUser);;
+            userController.putUser(updatedUser);
         });
 
         String expectedMessage = "No user with id " + updatedUser.getId();
@@ -304,7 +304,7 @@ public class UserControllerTest {
         String actualMessage2 = exception2.getMessage();
         assertEquals(expectedMessage2, actualMessage2);
 
-        Exception exception3= assertThrows(ValidationException.class, () -> {
+        Exception exception3 = assertThrows(ValidationException.class, () -> {
             userController.addFriend(user1.getId(), user1.getId());
         });
 
@@ -348,7 +348,7 @@ public class UserControllerTest {
         String actualMessage2 = exception2.getMessage();
         assertEquals(expectedMessage2, actualMessage2);
 
-        Exception exception3= assertThrows(ValidationException.class, () -> {
+        Exception exception3 = assertThrows(ValidationException.class, () -> {
             userController.addFriend(user1.getId(), user1.getId());
         });
 

@@ -52,7 +52,7 @@ public class UserController {
 
     @PutMapping("/{userId}/friends/{friendId}")
     public User addFriend(@PathVariable Long userId, @PathVariable Long friendId) {
-        if(userId == friendId) {
+        if (userId == friendId) {
             log.error("UserID and FriendID should be different");
             throw new ValidationException("UserID and FriendID should be different");
         }
@@ -62,7 +62,7 @@ public class UserController {
 
     @DeleteMapping("/{userId}/friends/{friendId}")
     public User deleteFriend(@PathVariable Long userId, @PathVariable Long friendId) {
-        if(userId == friendId) {
+        if (userId == friendId) {
             log.error("UserID and FriendID should be different");
             throw new ValidationException("UserID and FriendID should be different");
         }

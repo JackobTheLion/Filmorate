@@ -7,15 +7,15 @@ import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Component
 @Slf4j
-public class InMemoryUserStorage implements UserStorage{
+public class InMemoryUserStorage implements UserStorage {
 
     private final Map<Long, User> users = new HashMap<>();
     private final Set<String> userEmails = new HashSet<>();
     private long id = 0;
+
     @Override
     public User addUser(User user) {
         log.info("Trying to add user: {}", user);
@@ -40,7 +40,7 @@ public class InMemoryUserStorage implements UserStorage{
         log.info("Trying to update user: {}", user);
         if (!users.containsKey(user.getId())) {
             log.error("No user with id {}", user.getId());
-            throw new UserNotFoundException ("No user with id " + user.getId());
+            throw new UserNotFoundException("No user with id " + user.getId());
         }
         if (user.getName() == null || user.getName().isEmpty() || user.getName().isBlank()) {
             log.error("User name empty. Set login {} as name", user.getLogin());
@@ -61,7 +61,7 @@ public class InMemoryUserStorage implements UserStorage{
     public User findUser(Long id) {
         log.info("Looking for user with id: {}", id);
         User userFound = users.get(id);
-        if(userFound == null) {
+        if (userFound == null) {
             log.info("User with id {} not found", id);
             throw new UserNotFoundException(String.format("User with id %s not found", id));
         }

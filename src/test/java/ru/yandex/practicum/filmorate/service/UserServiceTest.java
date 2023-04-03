@@ -19,7 +19,6 @@ import static org.junit.jupiter.api.Assertions.*;
 public class UserServiceTest {
     UserStorage userStorage;
     UserService userService;
-
     Film film1;
     Film film2;
     User user1;

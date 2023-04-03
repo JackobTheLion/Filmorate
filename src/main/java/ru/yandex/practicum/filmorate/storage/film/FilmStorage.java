@@ -6,8 +6,10 @@ import java.util.List;
 
 public interface FilmStorage {
     Film addFilm(Film film);
-    Film putFilm(Film film);
-    List<Film> getFilms();
-    Film findFilm(Long id);
 
+    Film putFilm(Film film);
+
+    List<Film> getFilms();
+
+    Film findFilm(Long id);
 }

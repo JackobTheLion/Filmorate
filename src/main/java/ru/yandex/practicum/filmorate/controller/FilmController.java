@@ -24,7 +24,7 @@ public class FilmController {
     }
 
     @PostMapping
-    public Film addFilm (@NotNull @Valid @RequestBody Film film) {
+    public Film addFilm(@NotNull @Valid @RequestBody Film film) {
         log.info("POST request received: {}", film);
         return filmStorage.addFilm(film);
     }
@@ -44,7 +44,7 @@ public class FilmController {
 
     @PutMapping("/{filmId}/like/{userId}")
     public Film addLike(@PathVariable Long filmId, @PathVariable Long userId) {
-        if(filmId <= 0 || userId <= 0){
+        if (filmId <= 0 || userId <= 0) {
             log.info("FilmId and User Id must be more than zero");
             throw new IllegalArgumentException("FilmId and User Id must be more than zero");
         }
@@ -54,7 +54,7 @@ public class FilmController {
 
     @DeleteMapping("/{filmId}/like/{userId}")
     public Film removeLike(@PathVariable Long filmId, @PathVariable Long userId) {
-        if(filmId <= 0 || userId <= 0) {
+        if (filmId <= 0 || userId <= 0) {
             log.info("FilmId and UserId must be more than zero");
             throw new IllegalArgumentException("FilmId and UserId must be more than zero");
         }
@@ -64,7 +64,7 @@ public class FilmController {
 
     @GetMapping("/popular")
     public List<Film> findPopularFilms(@RequestParam(required = false, defaultValue = "10") Integer count) {
-        if(count <= 0) {
+        if (count <= 0) {
             log.info("Count must be more than zero");
             throw new IllegalArgumentException("Count must be more than zero");
         }

@@ -11,7 +11,6 @@ import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
-import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -30,12 +29,12 @@ public class FilmService {
     public Film addLike(Long filmId, Long userId) {
         log.info("Adding like from id {} to film id {}", userId, filmId);
         User user = userStorage.findUser(userId);
-        if(user == null) {
+        if (user == null) {
             log.error("User with ID {} not found", userId);
             throw new UserNotFoundException(String.format("User with ID %s not found", userId));
         }
         Film film = filmStorage.findFilm(filmId);
-        if(film == null) {
+        if (film == null) {
             log.error("Film with ID {} not found", filmId);
             throw new FilmNotFoundException(String.format("Film with ID %s not found", userId));
         }
@@ -47,16 +46,16 @@ public class FilmService {
     public Film removeLike(Long filmId, Long userId) {
         log.info("Removing like from user id {} to film id {}", userId, filmId);
         User user = userStorage.findUser(userId);
-        if(user == null) {
+        if (user == null) {
             log.error("User with ID {} not found", userId);
             throw new UserNotFoundException(String.format("User with ID %s not found", userId));
         }
         Film film = filmStorage.findFilm(filmId);
-        if(film == null) {
+        if (film == null) {
             log.error("Film with ID {} not found", filmId);
             throw new FilmNotFoundException(String.format("Film with ID %s not found", userId));
         }
-        if(!film.getLikes().remove(userId)) {
+        if (!film.getLikes().remove(userId)) {
             log.error("Like from id {} to film id {} does not exist", userId, filmId);
             throw new LikeNotFoundException(String.format("Like from id %s to film id %s does not exist", userId, filmId));
         }
