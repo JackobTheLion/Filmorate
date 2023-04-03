@@ -40,7 +40,7 @@ public class InMemoryUserStorage implements UserStorage{
         log.info("Trying to update user: {}", user);
         if (!users.containsKey(user.getId())) {
             log.error("No user with id {}", user.getId());
-            throw new ValidationException("No user with id " + user.getId());
+            throw new UserNotFoundException ("No user with id " + user.getId());
         }
         if (user.getName() == null || user.getName().isEmpty() || user.getName().isBlank()) {
             log.error("User name empty. Set login {} as name", user.getLogin());

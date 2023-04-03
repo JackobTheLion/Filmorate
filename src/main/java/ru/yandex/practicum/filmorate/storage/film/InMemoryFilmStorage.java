@@ -17,7 +17,6 @@ import java.util.stream.Collectors;
 public class InMemoryFilmStorage implements FilmStorage{
 
     private final Map<Long, Film> films = new HashMap<>();
-    private final Set<Film> topFilms = new TreeSet<>(Comparator.comparing(film -> film.getLikes().size()));
     public static final LocalDate MIN_RELEASE_DATE = LocalDate.of(1895, 12, 28);
     private long id = 0;
     @Override
@@ -34,7 +33,6 @@ public class InMemoryFilmStorage implements FilmStorage{
         id++;
         film.setId(id);
         films.put(id, film);
-        topFilms.add(film);
         log.info("Film added: {}", film);
         return film;
     }
@@ -47,19 +45,17 @@ public class InMemoryFilmStorage implements FilmStorage{
                     + MIN_RELEASE_DATE);
         }
         if (!films.containsKey(film.getId())) {
-            log.error("Film with id " + film.getId() + "does not exist");
-            throw new ValidationException("Film with id " + film.getId() + " does not exist");
+            log.error("Film with id " + film.getId() + " does not exist");
+            throw new FilmNotFoundException("Film with id " + film.getId() + " does not exist");
         }
         films.put(film.getId(), film);
-        topFilms.removeIf(f -> f.getId() == film.getId());
-        topFilms.add(film);
         log.info("Film updated: {}", film);
         return film;
     }
 
     @Override
     public List<Film> getFilms() {
-        return new ArrayList<>(topFilms);
+        return new ArrayList<>(films.values());
     }
 
     @Override

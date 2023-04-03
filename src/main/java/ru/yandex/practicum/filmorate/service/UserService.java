@@ -46,7 +46,8 @@ public class UserService {
 
     public List<User> getCommonFriends(Long id, Long otherId) {
         log.info("Looking for common friends for {}  and {}", id, otherId);
-        Set<Long> commonFriendsId = new HashSet<>(userStorage.findUser(id).getFriends());
+        Set<Long> commonFriendsId = new HashSet<>();
+        commonFriendsId.addAll(userStorage.findUser(id).getFriends());
         commonFriendsId.retainAll(userStorage.findUser(otherId).getFriends());
 
         return userStorage.getUsers().stream()

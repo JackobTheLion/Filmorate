@@ -5,6 +5,7 @@ import lombok.Data;
 
 import javax.validation.constraints.*;
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.Set;
 
 @Data
@@ -20,5 +21,5 @@ public class Film {
     private final LocalDate releaseDate;
     @Min(1)
     private final long duration;
-    private final Set<Long> likes;
+    private final Set<Long> likes = new HashSet<>();
 }

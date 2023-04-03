@@ -44,19 +44,37 @@ public class FilmController {
 
     @PutMapping("/{filmId}/like/{userId}")
     public Film addLike(@PathVariable Long filmId, @PathVariable Long userId) {
+        if(filmId <= 0 || userId <= 0){
+            log.info("FilmId and User Id must be more than zero");
+            throw new IllegalArgumentException("FilmId and User Id must be more than zero");
+        }
         log.info("Adding like from id {} to film id {}", userId, filmId);
         return filmService.addLike(filmId, userId);
     }
 
     @DeleteMapping("/{filmId}/like/{userId}")
     public Film removeLike(@PathVariable Long filmId, @PathVariable Long userId) {
+        if(filmId <= 0 || userId <= 0) {
+            log.info("FilmId and UserId must be more than zero");
+            throw new IllegalArgumentException("FilmId and UserId must be more than zero");
+        }
         log.info("Deleting like from id {} to film id {}", userId, filmId);
         return filmService.removeLike(filmId, userId);
     }
 
-    @GetMapping("/popular?count={count}")
-    public List<Film> findPopularFilms(@RequestParam Integer count) {
+    @GetMapping("/popular")
+    public List<Film> findPopularFilms(@RequestParam(required = false, defaultValue = "10") Integer count) {
+        if(count <= 0) {
+            log.info("Count must be more than zero");
+            throw new IllegalArgumentException("Count must be more than zero");
+        }
         log.info("Showing top {} films", count);
         return filmService.getTopFilms(count);
+    }
+
+    @GetMapping("/{id}")
+    public Film findFilm(@PathVariable Long id) {
+        log.info("Looking for film ID {}", id);
+        return filmStorage.findFilm(id);
     }
 }
