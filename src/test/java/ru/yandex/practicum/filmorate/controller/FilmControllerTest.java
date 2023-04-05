@@ -37,7 +37,7 @@ public class FilmControllerTest {
         userStorage = new InMemoryUserStorage();
         filmService = new FilmService(filmStorage, userStorage);
 
-        filmController = new FilmController(filmStorage, filmService);
+        filmController = new FilmController( filmService);
 
         film1 = Film.builder()
                 .name("Крепкий орешек")

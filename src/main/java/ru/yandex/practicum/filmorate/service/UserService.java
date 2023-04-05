@@ -20,6 +20,27 @@ public class UserService {
         this.userStorage = userStorage;
     }
 
+    public User addUser(User user) {
+        log.info("Trying to add user: {}", user);
+        return userStorage.addUser(user);
+    }
+
+    public User putUser(User user) {
+        log.info("Trying to update user: {}", user);
+        return userStorage.putUser(user);
+    }
+
+    public List<User> getUsers() {
+        List<User> users = userStorage.getUsers();
+        log.info("Number of users registered: {}", users.size());
+        return users;
+    }
+
+    public User findUser(Long userId) {
+        log.info("Looking for user with id: {}", userId);
+        return userStorage.findUser(userId);
+    }
+
     public User addFriend(Long userId, Long friendId) {
         log.info("Making friends id {} and {}", userId, friendId);
         User user = userStorage.findUser(userId);
@@ -46,8 +67,7 @@ public class UserService {
 
     public List<User> getCommonFriends(Long id, Long otherId) {
         log.info("Looking for common friends for {}  and {}", id, otherId);
-        Set<Long> commonFriendsId = new HashSet<>();
-        commonFriendsId.addAll(userStorage.findUser(id).getFriends());
+        Set<Long> commonFriendsId = new HashSet<>(userStorage.findUser(id).getFriends());
         commonFriendsId.retainAll(userStorage.findUser(otherId).getFriends());
 
         return userStorage.getUsers().stream()

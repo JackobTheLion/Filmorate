@@ -13,16 +13,19 @@ import java.util.*;
 public class InMemoryUserStorage implements UserStorage {
 
     private final Map<Long, User> users = new HashMap<>();
-    private final Set<String> userEmails = new HashSet<>();
     private long id = 0;
 
     @Override
     public User addUser(User user) {
         log.info("Trying to add user: {}", user);
-        if (userEmails.contains(user.getEmail())) {
+        users.values().stream()
+                .filter(u -> u.getEmail().equals(user.getEmail()))
+                .findFirst()
+                .ifPresent(u -> {
             log.error("User with such email already exists");
             throw new ValidationException("User with such email already exists");
-        }
+        });
+
         if (user.getName() == null || user.getName().isEmpty() || user.getName().isBlank()) {
             log.error("User name empty. Set login {} as name", user.getLogin());
             user.setName(user.getLogin());
@@ -30,7 +33,6 @@ public class InMemoryUserStorage implements UserStorage {
         id++;
         user.setId(id);
         users.put(user.getId(), user);
-        userEmails.add(user.getEmail());
         log.info("User added: {}", user);
         return user;
     }

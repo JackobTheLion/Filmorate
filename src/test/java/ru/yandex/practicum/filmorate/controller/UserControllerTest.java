@@ -28,7 +28,7 @@ public class UserControllerTest {
     public void beforeEach() {
         userStorage = new InMemoryUserStorage();
         userService = new UserService(userStorage);
-        userController = new UserController(userStorage, userService);
+        userController = new UserController(userService);
         user1 = User.builder()
                 .email("email@email.ru")
                 .login("login")
@@ -64,7 +64,7 @@ public class UserControllerTest {
         init();
 
         User otherUser = User.builder()
-                .email(this.user1.getEmail())
+                .email(user1.getEmail())
                 .login("login")
                 .birthday(LocalDate.of(1990, 12, 26))
                 .name("userName")

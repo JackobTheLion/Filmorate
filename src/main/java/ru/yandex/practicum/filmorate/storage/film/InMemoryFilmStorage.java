@@ -13,8 +13,8 @@ import java.util.*;
 @Slf4j
 public class InMemoryFilmStorage implements FilmStorage {
 
-    private final Map<Long, Film> films = new HashMap<>();
     public static final LocalDate MIN_RELEASE_DATE = LocalDate.of(1895, 12, 28);
+    private final Map<Long, Film> films = new HashMap<>();
     private long id = 0;
 
     @Override
@@ -53,6 +53,7 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public List<Film> getFilms() {
+        log.info("Number of films registered: {}", films.size());
         return new ArrayList<>(films.values());
     }
 
