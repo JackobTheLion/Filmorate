@@ -10,8 +10,6 @@ import ru.yandex.practicum.filmorate.exceptions.UserNotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.ErrorResponse;
 
-import java.util.Map;
-
 @ControllerAdvice
 public class ErrorHandler {
 

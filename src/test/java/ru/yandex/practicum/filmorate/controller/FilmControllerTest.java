@@ -37,7 +37,7 @@ public class FilmControllerTest {
         userStorage = new InMemoryUserStorage();
         filmService = new FilmService(filmStorage, userStorage);
 
-        filmController = new FilmController( filmService);
+        filmController = new FilmController(filmService);
 
         film1 = Film.builder()
                 .name("Крепкий орешек")
@@ -107,7 +107,7 @@ public class FilmControllerTest {
     }
 
     @Test
-    public void addFilmIdAreadyExests() {
+    public void addFilmIdAlreadyExists() {
         filmController.addFilm(film1);
         Film film1 = Film.builder()
                 .name("Крепкий орешек")
