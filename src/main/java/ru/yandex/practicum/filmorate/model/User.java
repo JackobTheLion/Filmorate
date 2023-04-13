@@ -19,4 +19,11 @@ public class User {
     private String name;
     @Past
     private final LocalDate birthday;
+<<<<<<< Updated upstream
+=======
+    @JsonIgnore
+    private final Set<Long> confirmedFriends = new HashSet<>();
+    @JsonIgnore
+    private final Set<Long> unConfirmedFriends = new HashSet<>();
+>>>>>>> Stashed changes
 }
