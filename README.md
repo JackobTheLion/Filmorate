@@ -2,7 +2,7 @@
 
 Java filmorate DB scheme
 
-<img src="image/ER_DB.png">
+<img src="image/ERDB.png">
 
 ## Samples of requests:
 
