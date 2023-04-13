@@ -1,10 +1,11 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.validation.annotation.Validated;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserService;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -14,48 +15,67 @@ import java.util.*;
 @RequestMapping("/users")
 @Slf4j
 public class UserController {
-    private final Map<Integer, User> users = new HashMap<>();
-    private final Set<String> userEmails = new HashSet<>();
-    private int id = 0;
+    private final UserService userService;
+
+    @Autowired
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
 
     @PostMapping
     public User addUser(@NotNull @Valid @RequestBody User user) {
         log.info("POST request received: {}", user);
-        if (userEmails.contains(user.getEmail())) {
-            log.error("User with such email already exists");
-            throw new ValidationException("User with such email already exists");
-        }
-        if (user.getName() == null || user.getName().isEmpty() || user.getName().isBlank()) {
-            log.error("User name empty. Set login {} as name", user.getLogin());
-            user.setName(user.getLogin());
-        }
-        id++;
-        user.setId(id);
-        users.put(user.getId(), user);
-        userEmails.add(user.getEmail());
-        log.info("User added: {}", user);
-        return user;
+        return userService.addUser(user);
     }
 
     @PutMapping
     public User putUser(@NotNull @Valid @RequestBody User user) {
         log.info("PUT request received: {}", user);
-        if (!users.containsKey(user.getId())) {
-            log.error("No user with id {}", user.getId());
-            throw new ValidationException("No user with id " + user.getId());
-        }
-        if (user.getName() == null || user.getName().isEmpty() || user.getName().isBlank()) {
-            log.error("User name empty. Set login {} as name", user.getLogin());
-            user.setName(user.getLogin());
-        }
-        users.put(user.getId(), user);
-        log.info("User {} was updated {}", user.getId(), user);
-        return user;
+        return userService.putUser(user);
     }
 
     @GetMapping
     public List<User> getUsers() {
+        List<User> users = userService.getUsers();
         log.info("Currently {} users registered.", users.size());
-        return new ArrayList<>(users.values());
+        return users;
+    }
+
+    @GetMapping("/{userId}")
+    public User findUser(@PathVariable Long userId) {
+        log.info("Looking for user: {}", userId);
+        return userService.findUser(userId);
+    }
+
+    @PutMapping("/{userId}/friends/{friendId}")
+    public User addFriend(@PathVariable Long userId, @PathVariable Long friendId) {
+        if (userId == friendId) {
+            log.error("UserID and FriendID should be different");
+            throw new ValidationException("UserID and FriendID should be different");
+        }
+        log.info("Making friends id {} and {}", userId, friendId);
+        return userService.addFriend(userId, friendId);
+    }
+
+    @DeleteMapping("/{userId}/friends/{friendId}")
+    public User deleteFriend(@PathVariable Long userId, @PathVariable Long friendId) {
+        if (userId == friendId) {
+            log.error("UserID and FriendID should be different");
+            throw new ValidationException("UserID and FriendID should be different");
+        }
+        log.info("Deleting friends id {} and {}", userId, friendId);
+        return userService.deleteFriend(userId, friendId);
+    }
+
+    @GetMapping("{id}/friends")
+    public List<User> getFriends(@PathVariable Long id) {
+        log.info("Looking for friend of Id: {}", id);
+        return userService.getFriends(id);
+    }
+
+    @GetMapping("/{id}/friends/common/{otherId}")
+    public List<User> getCommonFriends(@PathVariable() Long id, @PathVariable Long otherId) {
+        log.info("Looking for common friends for {}  and {}", id, otherId);
+        return userService.getCommonFriends(id, otherId);
     }
 }
