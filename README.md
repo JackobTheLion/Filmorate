@@ -70,9 +70,9 @@ FROM users
 WHERE user_id IN (
 SELECT user2_id
 FROM friends
-WHERE user1_id = id
+WHERE user1_id = 1 AND confirmed = true
 ) OR user_id IN (
 SELECT user1_id
 FROM friends
-WHERE user2_id = id
+WHERE user2_id = 1 AND confirmed = true
 );
