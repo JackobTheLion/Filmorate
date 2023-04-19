@@ -32,14 +32,14 @@ public class UserControllerTest {
         user1 = User.builder()
                 .email("email@email.ru")
                 .login("login")
-                .birthday(LocalDate.of(1990, 12, 26))
+                .birthdate(LocalDate.of(1990, 12, 26))
                 .name("userName")
                 .build();
 
         user2 = User.builder()
                 .email("other@email.ru")
                 .login("other")
-                .birthday(LocalDate.of(1980, 12, 26))
+                .birthdate(LocalDate.of(1980, 12, 26))
                 .name("otherName")
                 .build();
     }
@@ -66,7 +66,7 @@ public class UserControllerTest {
         User otherUser = User.builder()
                 .email(user1.getEmail())
                 .login("login")
-                .birthday(LocalDate.of(1990, 12, 26))
+                .birthdate(LocalDate.of(1990, 12, 26))
                 .name("userName")
                 .build();
 
@@ -86,7 +86,7 @@ public class UserControllerTest {
         User otherUser = User.builder()
                 .email("email@email.ru")
                 .login("login")
-                .birthday(LocalDate.of(1990, 12, 26))
+                .birthdate(LocalDate.of(1990, 12, 26))
                 .name(null)
                 .build();
 
@@ -102,7 +102,7 @@ public class UserControllerTest {
         User otherUser = User.builder()
                 .email("email@email.ru")
                 .login("login")
-                .birthday(LocalDate.of(1990, 12, 26))
+                .birthdate(LocalDate.of(1990, 12, 26))
                 .name("")
                 .build();
 
@@ -118,7 +118,7 @@ public class UserControllerTest {
         User otherUser = User.builder()
                 .email("email@email.ru")
                 .login("login")
-                .birthday(LocalDate.of(1990, 12, 26))
+                .birthdate(LocalDate.of(1990, 12, 26))
                 .name(" ")
                 .build();
 
@@ -136,7 +136,7 @@ public class UserControllerTest {
         User updatedUser = User.builder()
                 .email("email@yandex.ru")
                 .login("otherLogin")
-                .birthday(LocalDate.of(2000, 12, 26))
+                .birthdate(LocalDate.of(2000, 12, 26))
                 .name("otherUserName")
                 .id(user1.getId())
                 .build();
@@ -155,7 +155,7 @@ public class UserControllerTest {
         User updatedUser = User.builder()
                 .email("email@yandex.ru")
                 .login("otherLogin")
-                .birthday(LocalDate.of(2000, 12, 26))
+                .birthdate(LocalDate.of(2000, 12, 26))
                 .name("otherUserName")
                 .id(user1.getId() + 100)
                 .build();
@@ -179,7 +179,7 @@ public class UserControllerTest {
         User updatedUser = User.builder()
                 .email("email@yandex.ru")
                 .login("otherLogin")
-                .birthday(LocalDate.of(2000, 12, 26))
+                .birthdate(LocalDate.of(2000, 12, 26))
                 .name(null)
                 .id(user1.getId())
                 .build();
@@ -198,7 +198,7 @@ public class UserControllerTest {
         User updatedUser = User.builder()
                 .email("email@yandex.ru")
                 .login("otherLogin")
-                .birthday(LocalDate.of(2000, 12, 26))
+                .birthdate(LocalDate.of(2000, 12, 26))
                 .name("")
                 .id(user1.getId())
                 .build();
@@ -216,7 +216,7 @@ public class UserControllerTest {
         User updatedUser = User.builder()
                 .email("email@yandex.ru")
                 .login("otherLogin")
-                .birthday(LocalDate.of(2000, 12, 26))
+                .birthdate(LocalDate.of(2000, 12, 26))
                 .name(" ")
                 .id(user1.getId())
                 .build();
@@ -397,7 +397,7 @@ public class UserControllerTest {
         User user3 = User.builder()
                 .email("pochta@gmail.ru")
                 .login("loooooogin")
-                .birthday(LocalDate.of(2000, 12, 26))
+                .birthdate(LocalDate.of(2000, 12, 26))
                 .name("The Name")
                 .build();
         userStorage.addUser(user3);

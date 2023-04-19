@@ -51,14 +51,14 @@ public class FilmServiceTest {
         user1 = User.builder()
                 .email("email@email.ru")
                 .login("login")
-                .birthday(LocalDate.of(1990, 12, 26))
+                .birthdate(LocalDate.of(1990, 12, 26))
                 .name("userName")
                 .build();
 
         user2 = User.builder()
                 .email("other@email.ru")
                 .login("other")
-                .birthday(LocalDate.of(1980, 12, 26))
+                .birthdate(LocalDate.of(1980, 12, 26))
                 .name("otherName")
                 .build();
     }

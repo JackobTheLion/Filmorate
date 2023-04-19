@@ -9,17 +9,24 @@ import ru.yandex.practicum.filmorate.service.UserService;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-import java.util.*;
+import java.util.List;
 
-@RestController
-@RequestMapping("/users")
 @Slf4j
+@RequestMapping("/users")
+@RestController
 public class UserController {
     private final UserService userService;
 
     @Autowired
     public UserController(UserService userService) {
         this.userService = userService;
+    }
+
+    @GetMapping
+    public List<User> getUsers() {
+        List<User> users = userService.getUsers();
+        log.info("Currently {} users registered.", users.size());
+        return users;
     }
 
     @PostMapping
@@ -34,12 +41,6 @@ public class UserController {
         return userService.putUser(user);
     }
 
-    @GetMapping
-    public List<User> getUsers() {
-        List<User> users = userService.getUsers();
-        log.info("Currently {} users registered.", users.size());
-        return users;
-    }
 
     @GetMapping("/{userId}")
     public User findUser(@PathVariable Long userId) {
