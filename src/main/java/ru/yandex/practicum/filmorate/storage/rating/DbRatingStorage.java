@@ -29,10 +29,10 @@ public class DbRatingStorage implements RatingStorage {
 
     @Override
     public List<Rating> getAllRatings() {
-        String sql = "SELECT * FROM ratings";
+        String sql = "SELECT * FROM mpa";
         try {
             List<Rating> rating = jdbcTemplate.query(sql, (rs, rowNum) -> mapRating(rs));
-            log.info("Number of ratings: {}", rating.size());
+            log.info("Number of mpa: {}", rating.size());
             return rating;
         } catch (DataAccessException e) {
             log.error("DataAccessException message: {}", e.getMessage());
@@ -42,8 +42,8 @@ public class DbRatingStorage implements RatingStorage {
 
     @Override
     public Rating findRating(Long id) {
-        log.info("Looking for ratings: {}", id);
-        String sql = "SELECT * FROM ratings WHERE rating_id = ?";
+        log.info("Looking for mpa: {}", id);
+        String sql = "SELECT * FROM mpa WHERE mpa_id = ?";
         try {
             Rating rating = jdbcTemplate.queryForObject(sql, (rs, rowNum) -> mapRating(rs), id);
             log.info("Rating found: {}", rating);
@@ -57,7 +57,7 @@ public class DbRatingStorage implements RatingStorage {
 
     private Rating mapRating(ResultSet rs) throws SQLException {
         return Rating.builder()
-                .id(rs.getLong("rating_id"))
+                .id(rs.getLong("mpa_id"))
                 .mpa(rs.getString("mpa"))
                 .build();
     }

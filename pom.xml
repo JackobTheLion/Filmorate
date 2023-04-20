@@ -15,6 +15,11 @@
 	<description>Study project filmorate.</description>
 	<properties>
 		<java.version>11</java.version>
+
+		<flyway.user>sa</flyway.user>
+		<flyway.password>password</flyway.password>
+		<flyway.schemas>PUBLIC</flyway.schemas>
+
 	</properties>
 	<dependencies>
 		<dependency>
@@ -49,12 +54,15 @@
 		<dependency>
 			<groupId>com.h2database</groupId>
 			<artifactId>h2</artifactId>
+			<version>2.1.210</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-jdbc</artifactId>
 		</dependency>
+
+
 
 	</dependencies>
 
@@ -64,6 +72,17 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
+
+			<plugin>
+				<groupId>org.flywaydb</groupId>
+				<artifactId>flyway-maven-plugin</artifactId>
+				<configuration>
+					<url>jdbc:h2:file:./db/filmorate</url>
+					<user>sa</user>
+					<password>password</password>
+				</configuration>
+			</plugin>
+
 		</plugins>
 	</build>
 

@@ -8,6 +8,6 @@ INSERT INTO films (name, description, release_date, duration)
 VALUES ('Крепкий орешек', 'Крутой боевик с Брюсом Уиллисом', '1988-07-22', 133),
     ('Крепкий орешек 2', 'Крутой боевик с Брюсом Уиллисом. Вторая часть', '1990-07-02', 124);
 
-INSERT INTO ratings (mpa) VALUES ('G'), ('PG'), ('PG-13'), ('R'), ('NC-17');
+INSERT INTO mpa (mpa) VALUES ('G'), ('PG'), ('PG-13'), ('R'), ('NC-17');
 
 INSERT INTO genre (genre) VALUES ('Комедия'), ('Драма'), ('Мультфильм'), ('Триллер'), ('Документальный'), ('Боевик');
