@@ -5,7 +5,10 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
-import javax.validation.constraints.*;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
@@ -25,6 +28,7 @@ public class Film {
     @Min(1)
     private final long duration;
     private final String rating;
+    private final Set<String> genre;
     @JsonIgnore
     private final Set<Long> likes = new HashSet<>();
 }

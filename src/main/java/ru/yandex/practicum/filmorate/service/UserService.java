@@ -18,12 +18,16 @@ public class UserService {
     private final UserStorage userStorage;
 
     @Autowired
-    public UserService(@Qualifier("userDbStorage") UserStorage userStorage) {
+    public UserService(@Qualifier("dbStorage") UserStorage userStorage) {
         this.userStorage = userStorage;
     }
 
     public User addUser(User user) {
         log.info("Trying to add user: {}", user);
+        if (user.getName() == null || user.getName().isEmpty() || user.getName().isBlank()) {
+            log.error("User name empty. Set login {} as name", user.getLogin());
+            user.setName(user.getLogin());
+        }
         return userStorage.addUser(user);
     }
 
@@ -39,7 +43,7 @@ public class UserService {
     }
 
     public User findUser(Long userId) {
-        log.info("Looking for user with id: {}", userId);
+        log.info("Looking for user: {}", userId);
         return userStorage.findUser(userId);
     }
 
