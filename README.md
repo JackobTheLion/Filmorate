@@ -7,18 +7,21 @@ Java filmorate DB scheme
 ## Samples of requests:
 
 ### Get all films:
+
 ~~~
 SELECT *
 FROM films;
 ~~~
 
 ### Get all users
+
 ~~~
 SELECT *
 FROM users;
 ~~~
 
 ### Get films liked by user
+
 ~~~
 SELECT *
 FROM films
@@ -31,6 +34,7 @@ WHERE film_id IN
 ~~~
 
 ### Get common friends
+
 ~~~
 SELECT *
 FROM users AS u
@@ -56,6 +60,7 @@ AND ((u.user_id IN (
 ~~~
 
 ### Get top liked films
+
 ~~~
 SELECT f.name,
 COUNT(l.film_id) AS likes_number
@@ -67,6 +72,7 @@ LIMIT {count};
 ~~~
 
 ### Find user
+
 ~~~
 SELECT *
 FROM users
@@ -74,6 +80,7 @@ WHERE user_id = {id}
 ~~~
 
 ### Find film
+
 ~~~
 SELECT *
 FROM films
@@ -81,6 +88,7 @@ WHERE film_id = {id}
 ~~~
 
 ### Find friends
+
 ~~~
 SELECT *
 FROM users

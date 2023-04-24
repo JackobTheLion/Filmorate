@@ -5,4 +5,5 @@ CREATE TABLE films (
   release_date date NOT NULL,
   duration integer,
   rating integer REFERENCES mpa (mpa_id)
+  CONSTRAINT check_dates CHECK (release_date > '1895-12-28')
 );

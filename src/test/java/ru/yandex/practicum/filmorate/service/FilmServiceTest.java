@@ -19,7 +19,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class FilmServiceTest {
     FilmStorage filmStorage;
@@ -35,7 +36,7 @@ public class FilmServiceTest {
     public void beforeEach() {
         filmStorage = new InMemoryFilmStorage();
         userStorage = new InMemoryUserStorage();
-        filmService = new FilmService(filmStorage, userStorage);
+        filmService = new FilmService(filmStorage);
         film1 = Film.builder()
                 .name("Крепкий орешек")
                 .description("Крутой боевик с Брюсом Уиллисом")

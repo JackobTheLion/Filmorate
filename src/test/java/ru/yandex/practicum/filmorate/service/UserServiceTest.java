@@ -48,7 +48,7 @@ public class UserServiceTest {
                 .name("otherName")
                 .build();
 
-         user3 = User.builder()
+        user3 = User.builder()
                 .email("pochta@gmail.ru")
                 .login("loooooogin")
                 .birthday(LocalDate.of(2000, 12, 26))

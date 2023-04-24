@@ -9,8 +9,6 @@ import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
-import ru.yandex.practicum.filmorate.storage.rating.DbRatingStorage;
-import ru.yandex.practicum.filmorate.storage.rating.RatingStorage;
 import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
@@ -37,7 +35,7 @@ public class FilmControllerTest {
     public void beforeEach() {
         filmStorage = new InMemoryFilmStorage();
         userStorage = new InMemoryUserStorage();
-        filmService = new FilmService(filmStorage, userStorage);
+        filmService = new FilmService(filmStorage);
 
         filmController = new FilmController(filmService);
 
@@ -90,11 +88,11 @@ public class FilmControllerTest {
     @Test
     public void addFilmReleaseBeforeMinDate() {
         Film film1 = Film.builder()
-                        .name("Крепкий орешек")
-                        .description("Крутой боевик с Брюсом Уиллисом")
-                        .releaseDate(MIN_RELEASE_DATE.minusDays(1))
-                        .duration(133)
-                        .build();
+                .name("Крепкий орешек")
+                .description("Крутой боевик с Брюсом Уиллисом")
+                .releaseDate(MIN_RELEASE_DATE.minusDays(1))
+                .duration(133)
+                .build();
         Exception exception = assertThrows(ValidationException.class, () -> {
             filmController.addFilm(film1);
         });
@@ -201,7 +199,7 @@ public class FilmControllerTest {
     @Test
     public void getFilms() {
         filmController.addFilm(film1);
-        List<Film> expectedFilms  = new ArrayList<>();
+        List<Film> expectedFilms = new ArrayList<>();
         expectedFilms.add(film1);
         List<Film> savedFilms = filmController.getFilms();
         assertEquals(expectedFilms, savedFilms);

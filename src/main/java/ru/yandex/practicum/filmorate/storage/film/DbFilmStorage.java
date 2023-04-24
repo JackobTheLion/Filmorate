@@ -3,10 +3,11 @@ package ru.yandex.practicum.filmorate.storage.film;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DuplicateKeyException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exceptions.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -17,6 +18,7 @@ import ru.yandex.practicum.filmorate.storage.likes.LikesStorage;
 import ru.yandex.practicum.filmorate.storage.rating.RatingStorage;
 
 import java.sql.Date;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -33,8 +35,7 @@ public class DbFilmStorage implements FilmStorage {
     private final LikesStorage likesStorage;
 
     @Autowired
-    public DbFilmStorage(JdbcTemplate jdbcTemplate,
-                         @Qualifier("dbStorage") GenreStorage genreStorage,
+    public DbFilmStorage(JdbcTemplate jdbcTemplate, @Qualifier("dbStorage") GenreStorage genreStorage,
                          @Qualifier("dbStorage") RatingStorage ratingStorage,
                          @Qualifier("dbStorage") LikesStorage likesStorage) {
         this.jdbcTemplate = jdbcTemplate;
@@ -45,86 +46,69 @@ public class DbFilmStorage implements FilmStorage {
 
     @Override
     public Film addFilm(Film film) {
-        try {
-            SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
-                    .withTableName("films")
-                    .usingGeneratedKeyColumns("film_id");
-            film.setId(simpleJdbcInsert.executeAndReturnKey(film.toMap()).longValue());
-            setMpaToFilm(film);
-            return updateFilmGenres(film);
-        } catch (DataAccessException e) {
-            log.error("DataAccessException message: {}", e.getMessage());
-            throw e;
-        }
+        log.debug("Adding film {}", film);
+        String sql = "INSERT INTO films (name, description, release_date, duration, rating) VALUES (?,?,?,?,?)";
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        jdbcTemplate.update(connection -> {
+            PreparedStatement stmt = connection.prepareStatement(sql, new String[]{"film_id"});
+            stmt.setString(1, film.getName());
+            stmt.setString(2, film.getDescription());
+            stmt.setDate(3, Date.valueOf(film.getReleaseDate()));
+            stmt.setLong(4, film.getDuration());
+            stmt.setLong(5, film.getMpa().getId());
+            return stmt;
+        }, keyHolder);
+        film.setId(keyHolder.getKey().longValue());
+        log.debug("Added to DB with id {}", keyHolder.getKey().longValue());
+        return updateFilmGenres(film);
     }
 
     @Override
     public Film putFilm(Film film) {
-        String sql = "UPDATE films SET " +
-                "name = ?, " +
-                "description = ?, " +
-                "release_date = ?, " +
-                "duration = ?, " +
-                "rating = ? " +
+        log.debug("Updating film {}", film);
+        String sql = "UPDATE films SET name = ?, description = ?, release_date = ?, duration = ?, rating = ? " +
                 "WHERE film_id = ?";
-        try {
-            jdbcTemplate.update(sql,
-                    film.getName(),
-                    film.getDescription(),
-                    Date.valueOf(film.getReleaseDate()),
-                    film.getDuration(),
-                    film.getMpa().getId(),
-                    film.getId());
-
-            setMpaToFilm(film);
-            return updateFilmGenres(film);
-        } catch (DataAccessException e) {
-            log.error("DataAccessException message: {}", e.getMessage());
-            throw e;
+        if (jdbcTemplate.update(sql, film.getName(), film.getDescription(),
+                Date.valueOf(film.getReleaseDate()), film.getDuration(),
+                film.getMpa().getId(), film.getId()) <= 0) {
+            log.error("Film with id {} not found", film.getId());
+            throw new FilmNotFoundException(String.format("Film with id %s not found", film.getId()));
         }
+        setMpaToFilm(film);
+        return updateFilmGenres(film);
     }
 
     @Override
     public List<Film> getFilms() {
         String sql = "SELECT * FROM films f LEFT JOIN mpa m ON f.rating = m.mpa_id";
-        try {
-            List<Film> films = jdbcTemplate.query(sql, (rs, rowNum) -> mapFilm(rs));
-            log.info("Number of films registered: {}", films.size());
-            return films;
-        } catch (DataAccessException e) {
-            log.error("DataAccessException message: {}", e.getMessage());
-            throw e;
-        }
+        List<Film> films = jdbcTemplate.query(sql, (rs, rowNum) -> mapFilm(rs));
+        log.info("Number of films registered: {}", films.size());
+        return films;
     }
 
     @Override
     public List<Film> getPopularFilms(Integer limit) {
-        String sql = "SELECT * FROM films f LEFT JOIN mpa m ON f.rating = m.mpa_id WHERE f.film_id IN (" +
-                "SELECT film_id FROM likes GROUP BY film_id ORDER BY count(distinct user_id) DESC) LIMIT ?;";
-        try {
-            List<Film> films = jdbcTemplate.query(sql, (rs, rowNum) -> mapFilm(rs), limit);
-            log.info("Number of top films: {}", films.size());
-            return films;
-        } catch (DataAccessException e) {
-            log.error("DataAccessException message: {}", e.getMessage());
-            throw e;
-        }
+        String sql = "SELECT * FROM films f LEFT JOIN mpa m ON f.rating = m.mpa_id " +
+                "LEFT JOIN likes l ON f.film_id = l.film_id GROUP BY f.film_id ORDER BY count(l.user_id) DESC LIMIT ?";
+        List<Film> films = jdbcTemplate.query(sql, (rs, rowNum) -> mapFilm(rs), limit);
+        log.info("Number of top films: {}", films.size());
+        return films;
     }
 
     @Override
     public Film findFilm(Long id) {
         log.info("Looking for film: {}", id);
         String sql = "SELECT * FROM films f JOIN mpa m ON f.rating = m.mpa_id WHERE film_id = ?";
+        Film film;
         try {
-            Film film = jdbcTemplate.queryForObject(sql, (rs, rowNum) -> mapFilm(rs), id);
-            log.info("Film found: {}", film);
+            film = jdbcTemplate.queryForObject(sql, (rs, rowNum) -> mapFilm(rs), id);
             film.setGenres(genreStorage.getFilmGenres(film.getId()));
-            return film;
-        } catch (DataAccessException e) {
+            log.info("Film found: {}", film);
+        } catch (EmptyResultDataAccessException e) {
             log.error("Film with id {} not found", id);
-            log.error("DataAccessException message: {}", e.getMessage());
-            throw new FilmNotFoundException(String.format("Film with id %s not found", id));
+            throw new FilmNotFoundException(String.format("Film wth id %s not found", id));
         }
+        return film;
     }
 
     public void addLike(Long filmId, Long userId) {
@@ -159,17 +143,6 @@ public class DbFilmStorage implements FilmStorage {
     }
 
     private Film mapFilm(ResultSet rs) throws SQLException {
-        return Film.builder()
-                .id(rs.getLong("film_id"))
-                .name(rs.getString("name"))
-                .description(rs.getString("description"))
-                .releaseDate(rs.getDate("release_date").toLocalDate())
-                .duration(rs.getLong("duration"))
-                .mpa(Mpa.builder()
-                        .id(rs.getInt("rating"))
-                        .name(rs.getString("mpa"))
-                        .build())
-                .genres(genreStorage.getFilmGenres(rs.getLong("film_id")))
-                .build();
+        return Film.builder().id(rs.getLong("film_id")).name(rs.getString("name")).description(rs.getString("description")).releaseDate(rs.getDate("release_date").toLocalDate()).duration(rs.getLong("duration")).mpa(Mpa.builder().id(rs.getInt("mpa_id")).name(rs.getString("mpa")).build()).genres(genreStorage.getFilmGenres(rs.getLong("film_id"))).build();
     }
 }

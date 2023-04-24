@@ -50,18 +50,16 @@ public class DbUserStorage implements UserStorage {
                 "name = ?, " +
                 "birthday = ?" +
                 "WHERE user_id = ?";
-        try {
-            jdbcTemplate.update(sql,
-                    user.getEmail(),
-                    user.getLogin(),
-                    user.getName(),
-                    Date.valueOf(user.getBirthday()),
-                    user.getId());
-            return user;
-        } catch (DataAccessException e) {
-            log.error("DataAccessException message: {}", e.getMessage());
-            throw e;
+        if (jdbcTemplate.update(sql,
+                user.getEmail(),
+                user.getLogin(),
+                user.getName(),
+                Date.valueOf(user.getBirthday()),
+                user.getId()) <= 0) {
+            log.error("User with id {} not found", user.getId());
+            throw new UserNotFoundException(String.format("User with id %s not found", user.getId()));
         }
+        return user;
     }
 
     @Override

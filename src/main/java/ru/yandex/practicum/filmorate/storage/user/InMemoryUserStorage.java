@@ -27,9 +27,9 @@ public class InMemoryUserStorage implements UserStorage {
                 .filter(u -> u.getEmail().equals(user.getEmail()))
                 .findFirst()
                 .ifPresent(u -> {
-            log.error("User with such email already exists");
-            throw new ValidationException("User with such email already exists");
-        });
+                    log.error("User with such email already exists");
+                    throw new ValidationException("User with such email already exists");
+                });
 
         if (user.getName() == null || user.getName().isEmpty() || user.getName().isBlank()) {
             log.error("User name empty. Set login {} as name", user.getLogin());

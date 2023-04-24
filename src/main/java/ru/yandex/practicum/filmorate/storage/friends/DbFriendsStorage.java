@@ -3,9 +3,11 @@ package ru.yandex.practicum.filmorate.storage.friends;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.exceptions.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.sql.ResultSet;
@@ -36,9 +38,13 @@ public class DbFriendsStorage implements FriendsStorage {
             jdbcTemplate.update(sqlUpdate, friendId, userId);
             log.info("Reverse friendship request already exist. Friendship confirmed.");
         } else {
-            String sqlInsert = "INSERT INTO friends (user1_id, user2_id) VALUES (?,?)";
-            jdbcTemplate.update(sqlInsert, userId, friendId);
-            log.info("Friendship request created.");
+            try {
+                String sqlInsert = "INSERT INTO friends (user1_id, user2_id) VALUES (?,?)";
+                jdbcTemplate.update(sqlInsert, userId, friendId);
+                log.info("Friendship request created.");
+            } catch (DataIntegrityViolationException e) {
+                throw new UserNotFoundException(String.format("User with id %s or %s not found", userId, friendId));
+            }
         }
     }
 
@@ -64,19 +70,19 @@ public class DbFriendsStorage implements FriendsStorage {
     @Override
     public List<User> getFriends(Long userId) {
         String sql = "SELECT * FROM filmorate_users WHERE " +
-                "user_id IN (SELECT user2_id FROM friends WHERE user1_id = ? AND confirmed = true) " +
+                "user_id IN (SELECT user2_id FROM friends WHERE user1_id = ?) " +
                 "OR (user_id IN (SELECT user1_id FROM friends WHERE user2_id = ? AND confirmed = true))";
-        List<User> films = jdbcTemplate.query(sql, (rs, rowNum) -> mapUser(rs), userId, userId);
-        log.info("Number of top films: {}", films.size());
-        return films;
+        List<User> friends = jdbcTemplate.query(sql, (rs, rowNum) -> mapUser(rs), userId, userId);
+        log.info("Number of friends: {}", friends.size());
+        return friends;
     }
 
     @Override
     public List<User> getCommonFriends(Long userId, Long friendId) {
         String sql = "SELECT * FROM filmorate_users AS u WHERE ((u.user_id IN " +
-                "(SELECT user2_id FROM friends WHERE user1_id = ? AND confirmed = true)) " +
+                "(SELECT user2_id FROM friends WHERE user1_id = ?)) " +
                 "OR (u.user_id IN (SELECT user1_id FROM friends WHERE user2_id = ? AND confirmed = true))) " +
-                "AND ((u.user_id IN (SELECT user2_id FROM friends WHERE user1_id = ? AND confirmed = true)) " +
+                "AND ((u.user_id IN (SELECT user2_id FROM friends WHERE user1_id = ?)) " +
                 "OR (u.user_id IN (SELECT user1_id FROM friends WHERE user2_id = ? AND confirmed = true)))";
 
         return jdbcTemplate.query(sql, (rs, rowNum) -> mapUser(rs), userId, userId, friendId, friendId);
