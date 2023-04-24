@@ -1,10 +1,8 @@
 package ru.yandex.practicum.filmorate.storage.likes;
 
-import ru.yandex.practicum.filmorate.model.Like;
-
 public interface LikesStorage {
 
-    Like addLike(Like like);
+    void addLike(Long filmId, Long userId);
 
-    Like deleteLike(Like like);
+    void removeLike(Long filmId, Long userId);
 }

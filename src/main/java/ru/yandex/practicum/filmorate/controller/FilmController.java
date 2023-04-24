@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.controller;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
@@ -41,23 +42,23 @@ public class FilmController {
     }
 
     @PutMapping("/{filmId}/like/{userId}")
-    public Film addLike(@PathVariable Long filmId, @PathVariable Long userId) {
+    public void addLike(@PathVariable Long filmId, @PathVariable Long userId) {
         if (filmId <= 0 || userId <= 0) {
             log.info("FilmId and User Id must be more than zero");
             throw new IllegalArgumentException("FilmId and User Id must be more than zero");
         }
         log.info("Adding like from id {} to film id {}", userId, filmId);
-        return filmService.addLike(filmId, userId);
+        filmService.addLike(filmId, userId);
     }
 
     @DeleteMapping("/{filmId}/like/{userId}")
-    public Film removeLike(@PathVariable Long filmId, @PathVariable Long userId) {
+    public void removeLike(@PathVariable Long filmId, @PathVariable Long userId) {
         if (filmId <= 0 || userId <= 0) {
             log.info("FilmId and UserId must be more than zero");
-            throw new IllegalArgumentException("FilmId and UserId must be more than zero");
+            throw new NotFoundException("FilmId and UserId must be more than zero");
         }
         log.info("Deleting like from id {} to film id {}", userId, filmId);
-        return filmService.removeLike(filmId, userId);
+        filmService.removeLike(filmId, userId);
     }
 
     @GetMapping("/popular")

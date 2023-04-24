@@ -13,6 +13,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
+import ru.yandex.practicum.filmorate.storage.likes.LikesStorage;
 import ru.yandex.practicum.filmorate.storage.rating.RatingStorage;
 
 import java.sql.Date;
@@ -29,14 +30,17 @@ public class DbFilmStorage implements FilmStorage {
     private final JdbcTemplate jdbcTemplate;
     private final GenreStorage genreStorage;
     private final RatingStorage ratingStorage;
+    private final LikesStorage likesStorage;
 
     @Autowired
     public DbFilmStorage(JdbcTemplate jdbcTemplate,
                          @Qualifier("dbStorage") GenreStorage genreStorage,
-                         @Qualifier("dbStorage") RatingStorage ratingStorage) {
+                         @Qualifier("dbStorage") RatingStorage ratingStorage,
+                         @Qualifier("dbStorage") LikesStorage likesStorage) {
         this.jdbcTemplate = jdbcTemplate;
         this.genreStorage = genreStorage;
         this.ratingStorage = ratingStorage;
+        this.likesStorage = likesStorage;
     }
 
     @Override
@@ -94,6 +98,20 @@ public class DbFilmStorage implements FilmStorage {
     }
 
     @Override
+    public List<Film> getPopularFilms(Integer limit) {
+        String sql = "SELECT * FROM films f LEFT JOIN mpa m ON f.rating = m.mpa_id WHERE f.film_id IN (" +
+                "SELECT film_id FROM likes GROUP BY film_id ORDER BY count(distinct user_id) DESC) LIMIT ?;";
+        try {
+            List<Film> films = jdbcTemplate.query(sql, (rs, rowNum) -> mapFilm(rs), limit);
+            log.info("Number of top films: {}", films.size());
+            return films;
+        } catch (DataAccessException e) {
+            log.error("DataAccessException message: {}", e.getMessage());
+            throw e;
+        }
+    }
+
+    @Override
     public Film findFilm(Long id) {
         log.info("Looking for film: {}", id);
         String sql = "SELECT * FROM films f JOIN mpa m ON f.rating = m.mpa_id WHERE film_id = ?";
@@ -107,6 +125,14 @@ public class DbFilmStorage implements FilmStorage {
             log.error("DataAccessException message: {}", e.getMessage());
             throw new FilmNotFoundException(String.format("Film with id %s not found", id));
         }
+    }
+
+    public void addLike(Long filmId, Long userId) {
+        likesStorage.addLike(filmId, userId);
+    }
+
+    public void removeLike(Long filmId, Long userId) {
+        likesStorage.removeLike(filmId, userId);
     }
 
     private void setMpaToFilm(Film film) {
