@@ -2,10 +2,13 @@ package ru.yandex.practicum.filmorate.controller;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.jdbc.core.JdbcTemplate;
 import ru.yandex.practicum.filmorate.exceptions.UserNotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.storage.friends.DbFriendsStorage;
+import ru.yandex.practicum.filmorate.storage.friends.FriendsStorage;
 import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
@@ -27,7 +30,8 @@ public class UserControllerTest {
     @BeforeEach
     public void beforeEach() {
         userStorage = new InMemoryUserStorage();
-        userService = new UserService(userStorage);
+        FriendsStorage friendsStorage = new DbFriendsStorage(new JdbcTemplate());
+        userService = new UserService(userStorage, friendsStorage);
         userController = new UserController(userService);
         user1 = User.builder()
                 .email("email@email.ru")

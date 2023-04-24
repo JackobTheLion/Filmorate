@@ -34,7 +34,7 @@ WHERE film_id IN
 ~~~
 SELECT *
 FROM users AS u
-WHERE ((u.user_id IN \
+WHERE ((u.user_id IN
 (
     SELECT user2_id
     FROM friends

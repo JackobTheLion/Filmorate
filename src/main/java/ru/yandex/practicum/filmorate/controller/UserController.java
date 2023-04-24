@@ -49,23 +49,23 @@ public class UserController {
     }
 
     @PutMapping("/{userId}/friends/{friendId}")
-    public User addFriend(@PathVariable Long userId, @PathVariable Long friendId) {
+    public void addFriend(@PathVariable Long userId, @PathVariable Long friendId) {
         if (userId == friendId) {
             log.error("UserID and FriendID should be different");
             throw new ValidationException("UserID and FriendID should be different");
         }
         log.info("Making friends id {} and {}", userId, friendId);
-        return userService.addFriend(userId, friendId);
+        userService.addFriend(userId, friendId);
     }
 
     @DeleteMapping("/{userId}/friends/{friendId}")
-    public User deleteFriend(@PathVariable Long userId, @PathVariable Long friendId) {
+    public void deleteFriend(@PathVariable Long userId, @PathVariable Long friendId) {
         if (userId == friendId) {
             log.error("UserID and FriendID should be different");
             throw new ValidationException("UserID and FriendID should be different");
         }
         log.info("Deleting friends id {} and {}", userId, friendId);
-        return userService.deleteFriend(userId, friendId);
+        userService.deleteFriend(userId, friendId);
     }
 
     @GetMapping("{id}/friends")
