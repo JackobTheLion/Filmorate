@@ -4,12 +4,10 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
-import javax.validation.constraints.NotBlank;
-
 @Data
 @AllArgsConstructor
 @Builder
-public class Rating {
+public class Mpa {
     private final long id;
-    private final String name;
+    private String name;
 }

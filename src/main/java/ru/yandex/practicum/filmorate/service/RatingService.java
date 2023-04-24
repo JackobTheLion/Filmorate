@@ -4,7 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.model.Rating;
+import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.storage.rating.RatingStorage;
 
 import java.util.List;
@@ -20,11 +20,11 @@ public class RatingService {
         this.ratingStorage = ratingStorage;
     }
 
-    public List<Rating> getAllRatings() {
+    public List<Mpa> getAllRatings() {
         return ratingStorage.getAllRatings();
     }
 
-    public Rating findRating(Long id) {
+    public Mpa findRating(Long id) {
         return ratingStorage.findRating(id);
     }
 }

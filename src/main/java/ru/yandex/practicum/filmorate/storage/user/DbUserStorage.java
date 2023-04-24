@@ -5,14 +5,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
-import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exceptions.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.sql.Date;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
@@ -32,17 +30,11 @@ public class DbUserStorage implements UserStorage {
     @Override
     public User addUser(User user) {
         String sql = "INSERT INTO filmorate_users (email, login, name, birthday) VALUES (?,?,?,?)";
-        KeyHolder keyHolder = new GeneratedKeyHolder();
         try {
-            jdbcTemplate.update(connection -> {
-                PreparedStatement stmt = connection.prepareStatement(sql, new String[]{"user_id"});
-                stmt.setString(1, user.getEmail());
-                stmt.setString(2, user.getLogin());
-                stmt.setString(3, user.getName());
-                stmt.setDate(4, Date.valueOf(user.getBirthday()));
-                return stmt;
-            }, keyHolder);
-            user.setId(keyHolder.getKey().longValue());
+            SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
+                    .withTableName("filmorate_users")
+                    .usingGeneratedKeyColumns("user_id");
+            user.setId(simpleJdbcInsert.executeAndReturnKey(user.toMap()).longValue());
             return user;
         } catch (DataAccessException e) {
             log.error("DataAccessException message: {}", e.getMessage());

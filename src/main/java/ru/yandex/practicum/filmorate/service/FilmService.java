@@ -50,7 +50,6 @@ public class FilmService {
         log.info("Adding like from id {} to film id {}", userId, filmId);
         userStorage.findUser(userId);
         Film film = filmStorage.findFilm(filmId);
-        film.getLikes().add(userId);
         log.info("Like from id {} to film {} added", userId, filmId);
         return film;
     }
@@ -59,10 +58,10 @@ public class FilmService {
         log.info("Removing like from user id {} to film id {}", userId, filmId);
         userStorage.findUser(userId);
         Film film = filmStorage.findFilm(filmId);
-        if (!film.getLikes().remove(userId)) {
+/*        if (!film.getLikes().remove(userId)) {
             log.error("Like from id {} to film id {} does not exist", userId, filmId);
             throw new LikeNotFoundException(String.format("Like from id %s to film id %s does not exist", userId, filmId));
-        }
+        }*/
         log.info("Like from id {} to film {} removed", userId, filmId);
         return film;
     }
@@ -70,7 +69,7 @@ public class FilmService {
     public List<Film> getTopFilms(Integer count) {
         log.info("Returning top liked films, count {}", count);
         return filmStorage.getFilms().stream()
-                .sorted((film1, film2) -> (film1.getLikes().size() - film2.getLikes().size()) * -1)
+                //.sorted((film1, film2) -> (film1.getLikes().size() - film2.getLikes().size()) * -1)
                 .limit(count)
                 .collect(Collectors.toList());
     }

@@ -4,18 +4,21 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
-import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exceptions.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.Mpa;
+import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
+import ru.yandex.practicum.filmorate.storage.rating.RatingStorage;
 
 import java.sql.Date;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Component
@@ -24,29 +27,27 @@ import java.util.List;
 public class DbFilmStorage implements FilmStorage {
 
     private final JdbcTemplate jdbcTemplate;
+    private final GenreStorage genreStorage;
+    private final RatingStorage ratingStorage;
 
     @Autowired
-    public DbFilmStorage(JdbcTemplate jdbcTemplate) {
+    public DbFilmStorage(JdbcTemplate jdbcTemplate,
+                         @Qualifier("dbStorage") GenreStorage genreStorage,
+                         @Qualifier("dbStorage") RatingStorage ratingStorage) {
         this.jdbcTemplate = jdbcTemplate;
+        this.genreStorage = genreStorage;
+        this.ratingStorage = ratingStorage;
     }
 
     @Override
     public Film addFilm(Film film) {
-        String sql = "INSERT INTO films (name, description, release_date, duration) VALUES (?,?,?,?)";
-
-        KeyHolder keyHolder = new GeneratedKeyHolder();
-
         try {
-            jdbcTemplate.update(connection -> {
-                PreparedStatement stmt = connection.prepareStatement(sql, new String[]{"film_id"});
-                stmt.setString(1, film.getName());
-                stmt.setString(2, film.getDescription());
-                stmt.setDate(3, Date.valueOf(film.getReleaseDate()));
-                stmt.setLong(4, film.getDuration());
-                return stmt;
-            }, keyHolder);
-            film.setId(keyHolder.getKey().longValue());
-            return film;
+            SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
+                    .withTableName("films")
+                    .usingGeneratedKeyColumns("film_id");
+            film.setId(simpleJdbcInsert.executeAndReturnKey(film.toMap()).longValue());
+            setMpaToFilm(film);
+            return updateFilmGenres(film);
         } catch (DataAccessException e) {
             log.error("DataAccessException message: {}", e.getMessage());
             throw e;
@@ -59,7 +60,8 @@ public class DbFilmStorage implements FilmStorage {
                 "name = ?, " +
                 "description = ?, " +
                 "release_date = ?, " +
-                "duration = ?" +
+                "duration = ?, " +
+                "rating = ? " +
                 "WHERE film_id = ?";
         try {
             jdbcTemplate.update(sql,
@@ -67,8 +69,11 @@ public class DbFilmStorage implements FilmStorage {
                     film.getDescription(),
                     Date.valueOf(film.getReleaseDate()),
                     film.getDuration(),
+                    film.getMpa().getId(),
                     film.getId());
-            return film;
+
+            setMpaToFilm(film);
+            return updateFilmGenres(film);
         } catch (DataAccessException e) {
             log.error("DataAccessException message: {}", e.getMessage());
             throw e;
@@ -77,7 +82,7 @@ public class DbFilmStorage implements FilmStorage {
 
     @Override
     public List<Film> getFilms() {
-        String sql = "SELECT * FROM films";
+        String sql = "SELECT * FROM films f LEFT JOIN mpa m ON f.rating = m.mpa_id";
         try {
             List<Film> films = jdbcTemplate.query(sql, (rs, rowNum) -> mapFilm(rs));
             log.info("Number of films registered: {}", films.size());
@@ -91,16 +96,40 @@ public class DbFilmStorage implements FilmStorage {
     @Override
     public Film findFilm(Long id) {
         log.info("Looking for film: {}", id);
-        String sql = "SELECT * FROM films WHERE film_id = ?";
+        String sql = "SELECT * FROM films f JOIN mpa m ON f.rating = m.mpa_id WHERE film_id = ?";
         try {
             Film film = jdbcTemplate.queryForObject(sql, (rs, rowNum) -> mapFilm(rs), id);
             log.info("Film found: {}", film);
+            film.setGenres(genreStorage.getFilmGenres(film.getId()));
             return film;
         } catch (DataAccessException e) {
             log.error("Film with id {} not found", id);
             log.error("DataAccessException message: {}", e.getMessage());
             throw new FilmNotFoundException(String.format("Film with id %s not found", id));
         }
+    }
+
+    private void setMpaToFilm(Film film) {
+        if (film.getMpa() != null && film.getMpa().getId() != 0) {
+            Mpa mpa = ratingStorage.findRating(film.getMpa().getId());
+            film.getMpa().setName(mpa.getName());
+        }
+    }
+
+    private Film updateFilmGenres(Film film) {
+        genreStorage.removeGenreFromFilm(film);
+        if (film.getGenres() != null && !film.getGenres().isEmpty()) {
+            List<Genre> duplicateGenres = new ArrayList<>();
+            for (Genre genre : film.getGenres()) {
+                try {
+                    genre.setName(genreStorage.addGenreToFilm(film, genre).getName());
+                } catch (DuplicateKeyException e) {
+                    duplicateGenres.add(genre);
+                }
+            }
+            film.getGenres().removeAll(duplicateGenres);
+        }
+        return film;
     }
 
     private Film mapFilm(ResultSet rs) throws SQLException {
@@ -110,7 +139,11 @@ public class DbFilmStorage implements FilmStorage {
                 .description(rs.getString("description"))
                 .releaseDate(rs.getDate("release_date").toLocalDate())
                 .duration(rs.getLong("duration"))
-                .rating(rs.getString("rating"))
+                .mpa(Mpa.builder()
+                        .id(rs.getInt("rating"))
+                        .name(rs.getString("mpa"))
+                        .build())
+                .genres(genreStorage.getFilmGenres(rs.getLong("film_id")))
                 .build();
     }
 }

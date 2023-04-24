@@ -7,9 +7,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exceptions.RatingNotFoundException;
-import ru.yandex.practicum.filmorate.exceptions.UserNotFoundException;
-import ru.yandex.practicum.filmorate.model.Rating;
-import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.model.Mpa;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -28,10 +26,10 @@ public class DbRatingStorage implements RatingStorage {
     }
 
     @Override
-    public List<Rating> getAllRatings() {
+    public List<Mpa> getAllRatings() {
         String sql = "SELECT * FROM mpa";
         try {
-            List<Rating> rating = jdbcTemplate.query(sql, (rs, rowNum) -> mapRating(rs));
+            List<Mpa> rating = jdbcTemplate.query(sql, (rs, rowNum) -> mapRating(rs));
             log.info("Number of mpa: {}", rating.size());
             return rating;
         } catch (DataAccessException e) {
@@ -41,13 +39,27 @@ public class DbRatingStorage implements RatingStorage {
     }
 
     @Override
-    public Rating findRating(Long id) {
+    public Mpa findFilmRating(Long filmId) {
+        String sql = "SELECT mpa FROM films f JOIN mpa m ON f.rating = m.mpa_id WHERE film_id = ?";
+        try {
+            Mpa mpa = jdbcTemplate.queryForObject(sql, (rs, rowNum) -> mapRating(rs), filmId);
+            log.info("Rating found: {}", mpa);
+            return mpa;
+        } catch (DataAccessException e) {
+            log.error("Rating for film id {} not found", filmId);
+            log.error("DataAccessException message: {}", e.getMessage());
+            throw new RatingNotFoundException(String.format("Rating with id %s not found", filmId));
+        }
+    }
+
+    @Override
+    public Mpa findRating(Long id) {
         log.info("Looking for mpa: {}", id);
         String sql = "SELECT * FROM mpa WHERE mpa_id = ?";
         try {
-            Rating rating = jdbcTemplate.queryForObject(sql, (rs, rowNum) -> mapRating(rs), id);
-            log.info("Rating found: {}", rating);
-            return rating;
+            Mpa mpa = jdbcTemplate.queryForObject(sql, (rs, rowNum) -> mapRating(rs), id);
+            log.info("Rating found: {}", mpa);
+            return mpa;
         } catch (DataAccessException e) {
             log.error("Rating with id {} not found", id);
             log.error("DataAccessException message: {}", e.getMessage());
@@ -55,10 +67,10 @@ public class DbRatingStorage implements RatingStorage {
         }
     }
 
-    private Rating mapRating(ResultSet rs) throws SQLException {
-        return Rating.builder()
+    private Mpa mapRating(ResultSet rs) throws SQLException {
+        return Mpa.builder()
                 .id(rs.getLong("mpa_id"))
-                .mpa(rs.getString("mpa"))
+                .name(rs.getString("mpa"))
                 .build();
     }
 }
