@@ -11,6 +11,5 @@ import javax.validation.constraints.NotBlank;
 @Builder
 public class Rating {
     private final long id;
-    @NotBlank
-    private final String mpa;
+    private final String name;
 }
