@@ -12,6 +12,7 @@ import java.util.List;
 
 @Service
 @Slf4j
+@Qualifier("dbStorage")
 public class UserService {
     private final UserStorage userStorage;
 

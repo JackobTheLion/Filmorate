@@ -11,6 +11,7 @@ import java.util.List;
 
 @Service
 @Slf4j
+@Qualifier("dbStorage")
 public class FilmService {
     private final FilmStorage filmStorage;
 
