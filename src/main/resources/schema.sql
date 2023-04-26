@@ -17,7 +17,7 @@ CREATE TABLE films (
   description varchar(255),
   release_date date,
   duration integer,
-  rating Integer REFERENCES mpa (mpa_id) ON DELETE CASCADE
+  mpa_id Integer REFERENCES mpa (mpa_id) ON DELETE CASCADE
 );
 
 CREATE TABLE likes (
@@ -41,5 +41,5 @@ CREATE TABLE friends (
   user1_id integer REFERENCES filmorate_users (user_id) ON DELETE CASCADE,
   user2_id integer REFERENCES filmorate_users (user_id) ON DELETE CASCADE,
   PRIMARY KEY (user1_id, user2_id),
-  confirmed boolean
+  confirmed boolean DEFAULT false
 );

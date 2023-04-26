@@ -3,7 +3,6 @@ package ru.yandex.practicum.filmorate.controller;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
@@ -43,30 +42,18 @@ public class FilmController {
 
     @PutMapping("/{filmId}/like/{userId}")
     public void addLike(@PathVariable Long filmId, @PathVariable Long userId) {
-        if (filmId <= 0 || userId <= 0) {
-            log.info("FilmId and User Id must be more than zero");
-            throw new IllegalArgumentException("FilmId and User Id must be more than zero");
-        }
         log.info("Adding like from id {} to film id {}", userId, filmId);
         filmService.addLike(filmId, userId);
     }
 
     @DeleteMapping("/{filmId}/like/{userId}")
     public void removeLike(@PathVariable Long filmId, @PathVariable Long userId) {
-        if (filmId <= 0 || userId <= 0) {
-            log.info("FilmId and UserId must be more than zero");
-            throw new NotFoundException("FilmId and UserId must be more than zero");
-        }
         log.info("Deleting like from id {} to film id {}", userId, filmId);
         filmService.removeLike(filmId, userId);
     }
 
     @GetMapping("/popular")
     public List<Film> findPopularFilms(@RequestParam(required = false, defaultValue = "10") Integer count) {
-        if (count <= 0) {
-            log.info("Count must be more than zero");
-            throw new IllegalArgumentException("Count must be more than zero");
-        }
         log.info("Showing top {} films", count);
         return filmService.getTopFilms(count);
     }

@@ -11,7 +11,6 @@ import java.util.List;
 
 @Service
 @Slf4j
-@Qualifier("dbStorage")
 public class GenreService {
 
     private final DbGenreStorage dbGenreStorage;

@@ -29,7 +29,6 @@ public class DbUserStorage implements UserStorage {
 
     @Override
     public User addUser(User user) {
-        String sql = "INSERT INTO filmorate_users (email, login, name, birthday) VALUES (?,?,?,?)";
         SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("filmorate_users")
                 .usingGeneratedKeyColumns("user_id");

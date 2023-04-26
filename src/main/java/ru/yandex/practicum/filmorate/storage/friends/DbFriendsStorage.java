@@ -51,10 +51,9 @@ public class DbFriendsStorage implements FriendsStorage {
     @Override
     public void removeFriend(Long userId, Long friendId) {
         if (checkFriendshipRequest(userId, friendId)) {
-            String sqlDeleteOld = "DELETE FROM friends WHERE user1_id = ? AND user2_id = ?";
-            jdbcTemplate.update(sqlDeleteOld, userId, friendId);
-            String sqlUpdate = "INSERT INTO friends (user1_id, user2_id) VALUES (?,?)";
-            jdbcTemplate.update(sqlUpdate, friendId, userId);
+            String sqlUpdate = "UPDATE friends SET user1_id = ?, user2_id = ?, confirmed = false " +
+                    "WHERE user1_id = ? AND user2_id = ?";
+            jdbcTemplate.update(sqlUpdate, friendId, userId, userId, friendId);
         } else if (checkFriendshipRequest(friendId, userId)) {
             String sqlUpdate = "UPDATE friends SET confirmed = false WHERE user1_id = ? AND user2_id = ?";
             jdbcTemplate.update(sqlUpdate, friendId, userId);

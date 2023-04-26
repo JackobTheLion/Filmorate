@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.friends.FriendsStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
@@ -12,7 +13,6 @@ import java.util.List;
 
 @Service
 @Slf4j
-@Qualifier("dbStorage")
 public class UserService {
     private final UserStorage userStorage;
 
@@ -51,11 +51,19 @@ public class UserService {
     }
 
     public void addFriend(Long userId, Long friendId) {
+        if (userId == friendId) {
+            log.error("UserID and FriendID should be different");
+            throw new ValidationException("UserID and FriendID should be different");
+        }
         log.info("Making friends id {} and {}", userId, friendId);
         friendsStorage.addFriend(userId, friendId);
     }
 
     public void deleteFriend(Long userId, Long friendId) {
+        if (userId == friendId) {
+            log.error("UserID and FriendID should be different");
+            throw new ValidationException("UserID and FriendID should be different");
+        }
         log.info("Deleting friends id {} and {}", userId, friendId);
         friendsStorage.removeFriend(userId, friendId);
     }

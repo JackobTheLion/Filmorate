@@ -3,7 +3,6 @@ package ru.yandex.practicum.filmorate.controller;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
 
@@ -50,20 +49,12 @@ public class UserController {
 
     @PutMapping("/{userId}/friends/{friendId}")
     public void addFriend(@PathVariable Long userId, @PathVariable Long friendId) {
-        if (userId == friendId) {
-            log.error("UserID and FriendID should be different");
-            throw new ValidationException("UserID and FriendID should be different");
-        }
         log.info("Making friends id {} and {}", userId, friendId);
         userService.addFriend(userId, friendId);
     }
 
     @DeleteMapping("/{userId}/friends/{friendId}")
     public void deleteFriend(@PathVariable Long userId, @PathVariable Long friendId) {
-        if (userId == friendId) {
-            log.error("UserID and FriendID should be different");
-            throw new ValidationException("UserID and FriendID should be different");
-        }
         log.info("Deleting friends id {} and {}", userId, friendId);
         userService.deleteFriend(userId, friendId);
     }

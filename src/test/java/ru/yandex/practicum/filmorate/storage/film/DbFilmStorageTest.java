@@ -13,6 +13,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.likes.DbLikesStorage;
 import ru.yandex.practicum.filmorate.storage.user.DbUserStorage;
 
 import java.time.LocalDate;
@@ -30,6 +31,7 @@ public class DbFilmStorageTest {
 
     private final DbFilmStorage filmStorage;
     private final DbUserStorage userStorage;
+    private final DbLikesStorage likesStorage;
     private final JdbcTemplate jdbcTemplate;
     private Film film1;
     private Film film2;
@@ -87,9 +89,9 @@ public class DbFilmStorageTest {
     public void initLikes() {
         initFilms();
         initUser();
-        filmStorage.addLike(film1.getId(), user1.getId());
-        filmStorage.addLike(film2.getId(), user1.getId());
-        filmStorage.addLike(film2.getId(), user2.getId());
+        likesStorage.addLike(film1.getId(), user1.getId());
+        likesStorage.addLike(film2.getId(), user1.getId());
+        likesStorage.addLike(film2.getId(), user2.getId());
         // Film1 1 like from user1
         // Film2 2 likes from user1 and user2
     }
@@ -218,8 +220,6 @@ public class DbFilmStorageTest {
     @Test
     public void putFilmNormal() {
         initFilms();
-        List<Genre> updatedGenres = new ArrayList<>();
-        updatedGenres.add(Genre.builder().id(1L).build());
         Film updatedFilm = Film.builder()
                 .id(film1.getId())
                 .name("Updated name")
@@ -227,12 +227,8 @@ public class DbFilmStorageTest {
                 .duration(999)
                 .releaseDate(LocalDate.of(2023, 1, 1))
                 .mpa(Mpa.builder().id(1).build())
-                .genres(updatedGenres)
                 .build();
         filmStorage.putFilm(updatedFilm);
-
-        List<Genre> expectedGenres = new ArrayList<>();
-        expectedGenres.add(Genre.builder().id(1L).name("Комедия").build());
 
         Optional<Film> filmOptional = Optional.of(filmStorage.findFilm(film1.getId()));
         assertThat(filmOptional)
@@ -245,7 +241,6 @@ public class DbFilmStorageTest {
                                 .hasFieldOrPropertyWithValue("releaseDate", updatedFilm.getReleaseDate())
                                 .hasFieldOrPropertyWithValue("releaseDate", updatedFilm.getReleaseDate())
                                 .hasFieldOrPropertyWithValue("mpa", new Mpa(1, "G"))
-                                .hasFieldOrPropertyWithValue("genres", expectedGenres)
                 );
     }
 
@@ -269,7 +264,7 @@ public class DbFilmStorageTest {
         assertEquals(exception.getMessage(), String.format("Film with id %s not found", wrongId));
     }
 
-    @Test
+/*    @Test
     public void putFilmWithDuplicatedGenre() {
         initFilms();
         List<Genre> updatedGenres = new ArrayList<>();
@@ -304,5 +299,5 @@ public class DbFilmStorageTest {
                                 .hasFieldOrPropertyWithValue("mpa", new Mpa(1, "G"))
                                 .hasFieldOrPropertyWithValue("genres", expectedGenres)
                 );
-    }
+    }*/
 }

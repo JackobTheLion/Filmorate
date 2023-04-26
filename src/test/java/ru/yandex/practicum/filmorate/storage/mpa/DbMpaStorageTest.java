@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.storage.rating;
+package ru.yandex.practicum.filmorate.storage.mpa;
 
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.BeforeEach;
@@ -8,7 +8,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.jdbc.JdbcTestUtils;
-import ru.yandex.practicum.filmorate.exceptions.RatingNotFoundException;
+import ru.yandex.practicum.filmorate.exceptions.MpaNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Mpa;
 
@@ -22,9 +22,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @SpringBootTest
 @AutoConfigureTestDatabase
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-public class DbRatingStorageTest {
+public class DbMpaStorageTest {
 
-    private final DbRatingStorage ratingStorage;
+    private final DbMpaStorage ratingStorage;
     private final JdbcTemplate jdbcTemplate;
     private Film film;
 
@@ -47,15 +47,15 @@ public class DbRatingStorageTest {
 
     @Test
     public void getRatingNormal() {
-        Mpa mpa = ratingStorage.findRating(1L);
+        Mpa mpa = ratingStorage.findMpa(1L);
         assertEquals(Mpa.builder().id(1L).name("G").build(), mpa);
     }
 
     @Test
     public void getRatingWrongId() {
         Long wrongId = 9999999L;
-        Throwable exception = assertThrows(RatingNotFoundException.class, () -> ratingStorage.findRating(wrongId));
-        assertEquals(exception.getMessage(), String.format("Rating with id %s not found", wrongId));
+        Throwable exception = assertThrows(MpaNotFoundException.class, () -> ratingStorage.findMpa(wrongId));
+        assertEquals(exception.getMessage(), String.format("Mpa with id %s not found", wrongId));
     }
 
     @Test
@@ -67,7 +67,7 @@ public class DbRatingStorageTest {
         expectedRatings.add(new Mpa(4, "R"));
         expectedRatings.add(new Mpa(5, "NC-17"));
 
-        List<Mpa> ratings = ratingStorage.getAllRatings();
+        List<Mpa> ratings = ratingStorage.getAllMpa();
 
         assertEquals(expectedRatings, ratings);
     }
