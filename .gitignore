@@ -44,5 +44,3 @@ build/
 
 *.db
 db/*
-
-checkstyle.xml
