@@ -108,8 +108,8 @@ public class DbLikesStorageTest {
 
         Throwable exception = assertThrows(NotFoundException.class,
                 () -> likesStorage.addLike(wrongFilmId, user1.getId()));
-        assertEquals(String.format("User with id %s or film with id %s not found", user1.getId(), wrongFilmId)
-                , exception.getMessage());
+        assertEquals(String.format("User with id %s or film with id %s not found", user1.getId(), wrongFilmId),
+                exception.getMessage());
     }
 
     @Test
@@ -119,8 +119,8 @@ public class DbLikesStorageTest {
 
         Throwable exception = assertThrows(NotFoundException.class,
                 () -> likesStorage.addLike(film1.getId(), wrongUserId));
-        assertEquals(String.format("User with id %s or film with id %s not found", wrongUserId, film1.getId())
-                , exception.getMessage());
+        assertEquals(String.format("User with id %s or film with id %s not found", wrongUserId, film1.getId()),
+                exception.getMessage());
     }
 
     @Test
@@ -147,8 +147,8 @@ public class DbLikesStorageTest {
 
         Throwable exception = assertThrows(NotFoundException.class,
                 () -> likesStorage.removeLike(film1.getId(), wrongUserId));
-        assertEquals(String.format("User with id %s or film with id %s not found", wrongUserId, film1.getId())
-                , exception.getMessage());
+        assertEquals(String.format("User with id %s or film with id %s not found", wrongUserId, film1.getId()),
+                exception.getMessage());
     }
 
     @Test
@@ -159,7 +159,7 @@ public class DbLikesStorageTest {
 
         Throwable exception = assertThrows(NotFoundException.class,
                 () -> likesStorage.removeLike(wrongFilmId, user1.getId()));
-        assertEquals(String.format("User with id %s or film with id %s not found", user1.getId(), wrongFilmId)
-                , exception.getMessage());
+        assertEquals(String.format("User with id %s or film with id %s not found", user1.getId(), wrongFilmId),
+                exception.getMessage());
     }
 }
