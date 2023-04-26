@@ -25,12 +25,10 @@ import java.util.List;
 public class DbFilmStorage implements FilmStorage {
 
     private final JdbcTemplate jdbcTemplate;
-    //private final GenreStorage genreStorage;
 
     @Autowired
-    public DbFilmStorage(JdbcTemplate jdbcTemplate, @Qualifier("dbStorage") GenreStorage genreStorage) {
+    public DbFilmStorage(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
-        //this.genreStorage = genreStorage;
     }
 
     @Override
@@ -98,30 +96,6 @@ public class DbFilmStorage implements FilmStorage {
         }
         return film;
     }
-
-/*    private void setMpaToFilm(Film film) {
-        if (film.getMpa() != null && film.getMpa().getId() != 0) {
-            Mpa mpa = mpaStorage.findMpa(film.getMpa().getId());
-            film.getMpa().setName(mpa.getName());
-            log.info("Mpa {} added to film id {}", mpa, film.getId());
-        }
-    }
-
-    private Film updateFilmGenres(Film film) {
-        genreStorage.removeGenreFromFilm(film);
-        if (film.getGenres() != null && !film.getGenres().isEmpty()) {
-            List<Genre> duplicateGenres = new ArrayList<>();
-            for (Genre genre : film.getGenres()) {
-                try {
-                    genre.setName(genreStorage.addGenreToFilm(film, genre).getName());
-                } catch (DuplicateKeyException e) {
-                    duplicateGenres.add(genre);
-                }
-            }
-            film.getGenres().removeAll(duplicateGenres);
-        }
-        return film;
-    }*/
 
     private Film mapFilm(ResultSet rs) throws SQLException {
         return Film.builder()

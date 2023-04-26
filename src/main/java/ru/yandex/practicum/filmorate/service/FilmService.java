@@ -39,15 +39,15 @@ public class FilmService {
     public Film addFilm(Film film) {
         log.error("Trying to add film {}", film);
         setMpaToFilm(film);
-        updateFilmGenres(film);
-        return filmStorage.addFilm(film);
+        filmStorage.addFilm(film);
+        return updateFilmGenres(film);
     }
 
     public Film putFilm(Film film) {
         log.error("Trying to put film {}", film);
         setMpaToFilm(film);
-        updateFilmGenres(film);
-        return filmStorage.putFilm(film);
+        filmStorage.putFilm(film);
+        return updateFilmGenres(film);
     }
 
     public List<Film> getFilms() {
