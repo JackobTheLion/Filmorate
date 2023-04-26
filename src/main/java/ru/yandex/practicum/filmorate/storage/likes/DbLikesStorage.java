@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.storage.likes;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
@@ -21,11 +22,13 @@ public class DbLikesStorage implements LikesStorage {
     @Override
     public void addLike(Long filmId, Long userId) {
         String sql = "INSERT INTO likes (film_id, user_id) VALUES (?,?)";
-        if (jdbcTemplate.update(sql, filmId, userId) != 1) {
+        try {
+            jdbcTemplate.update(sql, filmId, userId);
+            log.info("Like from id {} to film {} added", userId, filmId);
+        } catch (DataIntegrityViolationException e) {
             log.error("User with id {} or film with id {} not found", userId, filmId);
             throw new NotFoundException(String.format("User with id %s or film with id %s not found", userId, filmId));
         }
-        log.info("Like from id {} to film {} added", userId, filmId);
     }
 
     @Override

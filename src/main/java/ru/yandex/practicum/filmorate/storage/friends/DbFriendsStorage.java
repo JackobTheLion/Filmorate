@@ -50,27 +50,25 @@ public class DbFriendsStorage implements FriendsStorage {
 
     @Override
     public void removeFriend(Long userId, Long friendId) {
-        String sql = "SELECT * FROM friends WHERE user1_id = ? AND user2_id = ?";
-        SqlRowSet rsDirect = jdbcTemplate.queryForRowSet(sql, userId, friendId);
-        SqlRowSet rsReverse = jdbcTemplate.queryForRowSet(sql, friendId, userId);
-
-        if (rsDirect.next() && rsDirect.getBoolean("confirmed")) {
-            String sqlUpdate = "UPDATE friends SET confirmed = false WHERE user1_id = ? AND user2_id = ?";
-            jdbcTemplate.update(sqlUpdate, userId, friendId);
-        } else if (rsReverse.next() && rsReverse.getBoolean("confirmed")) {
+        if (checkFriendshipRequest(userId, friendId)) {
+            String sqlDeleteOld = "DELETE FROM friends WHERE user1_id = ? AND user2_id = ?";
+            jdbcTemplate.update(sqlDeleteOld, userId, friendId);
+            String sqlUpdate = "INSERT INTO friends (user1_id, user2_id) VALUES (?,?)";
+            jdbcTemplate.update(sqlUpdate, friendId, userId);
+        } else if (checkFriendshipRequest(friendId, userId)) {
             String sqlUpdate = "UPDATE friends SET confirmed = false WHERE user1_id = ? AND user2_id = ?";
             jdbcTemplate.update(sqlUpdate, friendId, userId);
         } else {
-            String sqlInsert = "DELETE from friends WHERE (user1_id = ? AND user2_id = ?) " +
+            String sqlDelete = "DELETE from friends WHERE (user1_id = ? AND user2_id = ?) " +
                     "OR (user1_id = ? AND user2_id = ?)";
-            jdbcTemplate.update(sqlInsert, userId, friendId, friendId, userId);
+            jdbcTemplate.update(sqlDelete, userId, friendId, friendId, userId);
         }
     }
 
     @Override
     public List<User> getFriends(Long userId) {
         String sql = "SELECT * FROM filmorate_users WHERE " +
-                "user_id IN (SELECT user2_id FROM friends WHERE user1_id = ?) " +
+                "user_id IN (SELECT user2_id FROM friends WHERE user1_id = ? ) " +
                 "OR (user_id IN (SELECT user1_id FROM friends WHERE user2_id = ? AND confirmed = true))";
         List<User> friends = jdbcTemplate.query(sql, (rs, rowNum) -> mapUser(rs), userId, userId);
         log.info("Number of friends: {}", friends.size());
@@ -86,6 +84,13 @@ public class DbFriendsStorage implements FriendsStorage {
                 "OR (u.user_id IN (SELECT user1_id FROM friends WHERE user2_id = ? AND confirmed = true)))";
 
         return jdbcTemplate.query(sql, (rs, rowNum) -> mapUser(rs), userId, userId, friendId, friendId);
+    }
+
+    private boolean checkFriendshipRequest(Long userId, Long friendId) {
+        String sql = "SELECT * FROM friends WHERE user1_id = ? AND user2_id = ?";
+        SqlRowSet rs = jdbcTemplate.queryForRowSet(sql, userId, friendId);
+        return rs.next() && rs.getBoolean("confirmed");
+
     }
 
     private User mapUser(ResultSet rs) throws SQLException {

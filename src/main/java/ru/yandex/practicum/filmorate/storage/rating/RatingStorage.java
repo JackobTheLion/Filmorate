@@ -8,6 +8,4 @@ public interface RatingStorage {
     List<Mpa> getAllRatings();
 
     Mpa findRating(Long id);
-
-    Mpa findFilmRating(Long filmId);
 }

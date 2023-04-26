@@ -58,6 +58,7 @@ public class DbFilmStorage implements FilmStorage {
             stmt.setLong(5, film.getMpa().getId());
             return stmt;
         }, keyHolder);
+        setMpaToFilm(film);
         film.setId(keyHolder.getKey().longValue());
         log.debug("Added to DB with id {}", keyHolder.getKey().longValue());
         return updateFilmGenres(film);
@@ -88,8 +89,9 @@ public class DbFilmStorage implements FilmStorage {
 
     @Override
     public List<Film> getPopularFilms(Integer limit) {
-        String sql = "SELECT * FROM films f LEFT JOIN mpa m ON f.rating = m.mpa_id " +
-                "LEFT JOIN likes l ON f.film_id = l.film_id GROUP BY f.film_id ORDER BY count(l.user_id) DESC LIMIT ?";
+        String sql = "SELECT f.film_id, f.name, f.description, f.release_date, f.duration, m.mpa_id, m.mpa FROM films f " +
+                "LEFT JOIN mpa m ON f.rating = m.mpa_id " +
+                "LEFT JOIN likes l ON l.film_id = f.film_id GROUP BY f.film_id ORDER BY COUNT(l.user_id) DESC LIMIT ?";
         List<Film> films = jdbcTemplate.query(sql, (rs, rowNum) -> mapFilm(rs), limit);
         log.info("Number of top films: {}", films.size());
         return films;
@@ -123,6 +125,7 @@ public class DbFilmStorage implements FilmStorage {
         if (film.getMpa() != null && film.getMpa().getId() != 0) {
             Mpa mpa = ratingStorage.findRating(film.getMpa().getId());
             film.getMpa().setName(mpa.getName());
+            log.info("MPA {} added to film id {}", mpa, film.getId());
         }
     }
 
@@ -143,6 +146,17 @@ public class DbFilmStorage implements FilmStorage {
     }
 
     private Film mapFilm(ResultSet rs) throws SQLException {
-        return Film.builder().id(rs.getLong("film_id")).name(rs.getString("name")).description(rs.getString("description")).releaseDate(rs.getDate("release_date").toLocalDate()).duration(rs.getLong("duration")).mpa(Mpa.builder().id(rs.getInt("mpa_id")).name(rs.getString("mpa")).build()).genres(genreStorage.getFilmGenres(rs.getLong("film_id"))).build();
+        return Film.builder()
+                .id(rs.getLong("film_id"))
+                .name(rs.getString("name"))
+                .description(rs.getString("description"))
+                .releaseDate(rs.getDate("release_date").toLocalDate())
+                .duration(rs.getLong("duration"))
+                .mpa(Mpa.builder()
+                        .id(rs.getInt("mpa_id"))
+                        .name(rs.getString("mpa"))
+                        .build())
+                .genres(genreStorage.getFilmGenres(rs.getLong("film_id")))
+                .build();
     }
 }

@@ -3,11 +3,13 @@ package ru.yandex.practicum.filmorate.storage.genre;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exceptions.GenreNotFoundException;
+import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 
@@ -30,14 +32,9 @@ public class DbGenreStorage implements GenreStorage {
     @Override
     public List<Genre> getAllGenres() {
         String sql = "SELECT * FROM genre";
-        try {
-            List<Genre> genres = jdbcTemplate.query(sql, (rs, rowNum) -> mapGenre(rs));
-            log.info("Number of genres: {}", genres.size());
-            return genres;
-        } catch (DataAccessException e) {
-            log.error("DataAccessException message: {}", e.getMessage());
-            throw e;
-        }
+        List<Genre> genres = jdbcTemplate.query(sql, (rs, rowNum) -> mapGenre(rs));
+        log.info("Number of genres: {}", genres.size());
+        return genres;
     }
 
     @Override
@@ -48,9 +45,8 @@ public class DbGenreStorage implements GenreStorage {
             Genre genre = jdbcTemplate.queryForObject(sql, (rs, rowNum) -> mapGenre(rs), id);
             log.info("Genre found: {}", genre);
             return genre;
-        } catch (DataAccessException e) {
+        } catch (EmptyResultDataAccessException e) {
             log.error("Genre with id {} not found", id);
-            log.error("DataAccessException message: {}", e.getMessage());
             throw new GenreNotFoundException(String.format("Genre with id %s not found", id));
         }
     }
@@ -58,11 +54,16 @@ public class DbGenreStorage implements GenreStorage {
     @Override
     public Genre addGenreToFilm(Film film, Genre genre) {
         try {
+            log.info("Adding genre id {} to film id {}", genre.getId(), film.getId());
             String sql = "INSERT INTO film_genre (film_id, genre_id) VALUES (?,?)";
             jdbcTemplate.update(sql, film.getId(), genre.getId());
+            log.info("Genre id {} added to film id {}", genre.getId(), film.getId());
         } catch (DuplicateKeyException e) {
-            log.info("Genre id {} already added to film id {}", genre.getId(), film.getId());
+            log.error("Genre id {} already added to film id {}", genre.getId(), film.getId());
             throw e;
+        } catch (DataIntegrityViolationException e) {
+            log.error("Film id {} or genre id {} not found", film.getId(), genre.getId());
+            throw new NotFoundException(String.format("Film id %s or genre id %s not found", film.getId(), genre.getId()));
         }
         return findGenre(genre.getId());
     }
