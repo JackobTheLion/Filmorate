@@ -96,8 +96,8 @@ public class DbGenreStorageTest {
         List<Genre> expectedGenres = new ArrayList<>();
         expectedGenres.add(expectedGenre);
 
-        Film savedFilm = filmStorage.findFilm(film.getId());
-        assertThat(savedFilm).hasFieldOrPropertyWithValue("genres", expectedGenres);
+        List<Genre> savedGenres = genreStorage.getFilmGenres(film.getId());
+        assertEquals(expectedGenres, savedGenres);
     }
 
     @Test

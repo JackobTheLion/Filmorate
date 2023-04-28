@@ -37,16 +37,16 @@ public class FilmService {
     }
 
     public Film addFilm(Film film) {
-        log.error("Trying to add film {}", film);
-        setMpaToFilm(film);
+        log.info("Trying to add film {}", film);
         filmStorage.addFilm(film);
+        setMpaToFilm(film);
         return updateFilmGenres(film);
     }
 
     public Film putFilm(Film film) {
-        log.error("Trying to put film {}", film);
-        setMpaToFilm(film);
+        log.info("Trying to put film {}", film);
         filmStorage.putFilm(film);
+        setMpaToFilm(film);
         return updateFilmGenres(film);
     }
 
@@ -68,7 +68,7 @@ public class FilmService {
 
     public void addLike(Long filmId, Long userId) {
         if (filmId <= 0 || userId <= 0) {
-            log.info("FilmId and User Id must be more than zero");
+            log.error("FilmId and User Id must be more than zero");
             throw new IllegalArgumentException("FilmId and User Id must be more than zero");
         }
         log.info("Adding like from id {} to film id {}", userId, filmId);
@@ -77,7 +77,7 @@ public class FilmService {
 
     public void removeLike(Long filmId, Long userId) {
         if (filmId <= 0 || userId <= 0) {
-            log.info("FilmId and UserId must be more than zero");
+            log.error("FilmId and UserId must be more than zero");
             throw new NotFoundException("FilmId and UserId must be more than zero");
         }
         log.info("Removing like from user id {} to film id {}", userId, filmId);
@@ -87,7 +87,7 @@ public class FilmService {
 
     public List<Film> getTopFilms(Integer count) {
         if (count <= 0) {
-            log.info("Count must be more than zero");
+            log.error("Count must be more than zero");
             throw new IllegalArgumentException("Count must be more than zero");
         }
         List<Film> popularFilms = filmStorage.getPopularFilms(count);
@@ -112,7 +112,8 @@ public class FilmService {
             List<Genre> duplicateGenres = new ArrayList<>();
             for (Genre genre : film.getGenres()) {
                 try {
-                    genre.setName(genreStorage.addGenreToFilm(film, genre).getName());
+                    String genreName = genreStorage.addGenreToFilm(film, genre).getName();
+                    genre.setName(genreName);
                 } catch (DuplicateKeyException e) {
                     duplicateGenres.add(genre);
                 }

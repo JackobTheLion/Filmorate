@@ -58,6 +58,7 @@ public class DbGenreStorage implements GenreStorage {
             String sql = "INSERT INTO film_genre (film_id, genre_id) VALUES (?,?)";
             jdbcTemplate.update(sql, film.getId(), genre.getId());
             log.info("Genre id {} added to film id {}", genre.getId(), film.getId());
+            return findGenre(genre.getId());
         } catch (DuplicateKeyException e) {
             log.error("Genre id {} already added to film id {}", genre.getId(), film.getId());
             throw e;
@@ -65,7 +66,6 @@ public class DbGenreStorage implements GenreStorage {
             log.error("Film id {} or genre id {} not found", film.getId(), genre.getId());
             throw new NotFoundException(String.format("Film id %s or genre id %s not found", film.getId(), genre.getId()));
         }
-        return findGenre(genre.getId());
     }
 
     @Override
