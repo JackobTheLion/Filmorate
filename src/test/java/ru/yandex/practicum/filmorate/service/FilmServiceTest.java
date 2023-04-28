@@ -8,6 +8,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.jdbc.JdbcTestUtils;
+import ru.yandex.practicum.filmorate.exceptions.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
@@ -18,6 +19,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @AutoConfigureTestDatabase
@@ -131,5 +133,73 @@ public class FilmServiceTest {
                                 .hasFieldOrPropertyWithValue("mpa", new Mpa(1, "G"))
                                 .hasFieldOrPropertyWithValue("genres", expectedGenres)
                 );
+    }
+
+    @Test
+    public void getFilmsNormal() {
+        initFilms();
+        filmService.addFilm(film);
+        List<Genre> expectedGenre = new ArrayList<>();
+        expectedGenre.add(new Genre(1L, "Комедия"));
+        List<Film> savedFilms = filmService.getFilms();
+        assertEquals(1, savedFilms.size());
+        assertThat(savedFilms.get(0))
+                .hasFieldOrPropertyWithValue("genres", expectedGenre);
+    }
+
+    @Test
+    public void getFilmsEmpty() {
+        List<Film> savedFilms = filmService.getFilms();
+        assertTrue(savedFilms.isEmpty());
+    }
+
+    @Test
+    public void findFilmNormal() {
+        initFilms();
+        filmService.addFilm(film);
+        List<Genre> expectedGenre = new ArrayList<>();
+        expectedGenre.add(new Genre(1L, "Комедия"));
+        Optional<Film> filmOptional = Optional.of(filmService.findFilm(film.getId()));
+        assertThat(filmOptional)
+                .isPresent()
+                .hasValueSatisfying(f ->
+                        assertThat(f).hasFieldOrPropertyWithValue("name", film.getName())
+                                .hasFieldOrPropertyWithValue("description", film.getDescription())
+                                .hasFieldOrPropertyWithValue("duration", film.getDuration())
+                                .hasFieldOrPropertyWithValue("releaseDate", film.getReleaseDate())
+                                .hasFieldOrPropertyWithValue("genres", expectedGenre)
+                );
+    }
+
+    @Test
+    public void findFilmWrongId() {
+        initFilms();
+        Long wrongId = film.getId() + 9999;
+        Throwable exception = assertThrows(FilmNotFoundException.class, () -> filmService.findFilm(wrongId));
+        assertThat(exception.getMessage().equals(String.format("Film wth id %s not found", wrongId)));
+    }
+
+    @Test
+    public void addLikeWrongId() {
+        Throwable exception1 = assertThrows(IllegalArgumentException.class, () -> filmService.addLike(-1L, 1L));
+        assertEquals("FilmId and User Id must be more than zero", exception1.getMessage());
+
+        Throwable exception2 = assertThrows(IllegalArgumentException.class, () -> filmService.addLike(1L, -1L));
+        assertEquals("FilmId and User Id must be more than zero", exception2.getMessage());
+    }
+
+    @Test
+    public void removeLikeWrongId() {
+        Throwable exception1 = assertThrows(IllegalArgumentException.class, () -> filmService.addLike(-1L, 1L));
+        assertEquals("FilmId and User Id must be more than zero", exception1.getMessage());
+
+        Throwable exception2 = assertThrows(IllegalArgumentException.class, () -> filmService.addLike(1L, -1L));
+        assertEquals("FilmId and User Id must be more than zero", exception2.getMessage());
+    }
+
+    @Test
+    public void getTOpFilmsWrongCount() {
+        Throwable exception = assertThrows(IllegalArgumentException.class, () -> filmService.getTopFilms(-1));
+        assertEquals("Count must be more than zero", exception.getMessage());
     }
 }

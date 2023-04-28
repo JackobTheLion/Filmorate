@@ -263,41 +263,4 @@ public class DbFilmStorageTest {
         Throwable exception = assertThrows(FilmNotFoundException.class, () -> filmStorage.putFilm(updatedFilm));
         assertEquals(exception.getMessage(), String.format("Film with id %s not found", wrongId));
     }
-
-/*    @Test
-    public void putFilmWithDuplicatedGenre() {
-        initFilms();
-        List<Genre> updatedGenres = new ArrayList<>();
-        updatedGenres.add(Genre.builder().id(1L).build());
-        updatedGenres.add(Genre.builder().id(1L).build());
-        updatedGenres.add(Genre.builder().id(2L).build());
-        Film updatedFilm = Film.builder()
-                .id(film1.getId())
-                .name("Updated name")
-                .description("Updated description")
-                .duration(999)
-                .releaseDate(LocalDate.of(2023, 1, 1))
-                .mpa(Mpa.builder().id(1).build())
-                .genres(updatedGenres)
-                .build();
-        filmStorage.putFilm(updatedFilm);
-
-        List<Genre> expectedGenres = new ArrayList<>();
-        expectedGenres.add(Genre.builder().id(1L).name("Комедия").build());
-        expectedGenres.add(Genre.builder().id(2L).name("Драма").build());
-
-        Optional<Film> filmOptional = Optional.of(filmStorage.findFilm(film1.getId()));
-        assertThat(filmOptional)
-                .isPresent()
-                .hasValueSatisfying(f ->
-                        assertThat(f).hasFieldOrPropertyWithValue("id", updatedFilm.getId())
-                                .hasFieldOrPropertyWithValue("name", updatedFilm.getName())
-                                .hasFieldOrPropertyWithValue("description", updatedFilm.getDescription())
-                                .hasFieldOrPropertyWithValue("duration", updatedFilm.getDuration())
-                                .hasFieldOrPropertyWithValue("releaseDate", updatedFilm.getReleaseDate())
-                                .hasFieldOrPropertyWithValue("releaseDate", updatedFilm.getReleaseDate())
-                                .hasFieldOrPropertyWithValue("mpa", new Mpa(1, "G"))
-                                .hasFieldOrPropertyWithValue("genres", expectedGenres)
-                );
-    }*/
 }
