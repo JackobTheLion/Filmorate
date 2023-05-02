@@ -12,4 +12,7 @@ public interface FilmStorage {
     List<Film> getFilms();
 
     Film findFilm(Long id);
+
+    List<Film> getPopularFilms(Integer limit);
+
 }

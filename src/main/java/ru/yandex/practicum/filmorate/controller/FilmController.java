@@ -8,7 +8,7 @@ import ru.yandex.practicum.filmorate.service.FilmService;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-import java.util.*;
+import java.util.List;
 
 @RestController
 @Slf4j
@@ -41,31 +41,19 @@ public class FilmController {
     }
 
     @PutMapping("/{filmId}/like/{userId}")
-    public Film addLike(@PathVariable Long filmId, @PathVariable Long userId) {
-        if (filmId <= 0 || userId <= 0) {
-            log.info("FilmId and User Id must be more than zero");
-            throw new IllegalArgumentException("FilmId and User Id must be more than zero");
-        }
+    public void addLike(@PathVariable Long filmId, @PathVariable Long userId) {
         log.info("Adding like from id {} to film id {}", userId, filmId);
-        return filmService.addLike(filmId, userId);
+        filmService.addLike(filmId, userId);
     }
 
     @DeleteMapping("/{filmId}/like/{userId}")
-    public Film removeLike(@PathVariable Long filmId, @PathVariable Long userId) {
-        if (filmId <= 0 || userId <= 0) {
-            log.info("FilmId and UserId must be more than zero");
-            throw new IllegalArgumentException("FilmId and UserId must be more than zero");
-        }
+    public void removeLike(@PathVariable Long filmId, @PathVariable Long userId) {
         log.info("Deleting like from id {} to film id {}", userId, filmId);
-        return filmService.removeLike(filmId, userId);
+        filmService.removeLike(filmId, userId);
     }
 
     @GetMapping("/popular")
     public List<Film> findPopularFilms(@RequestParam(required = false, defaultValue = "10") Integer count) {
-        if (count <= 0) {
-            log.info("Count must be more than zero");
-            throw new IllegalArgumentException("Count must be more than zero");
-        }
         log.info("Showing top {} films", count);
         return filmService.getTopFilms(count);
     }

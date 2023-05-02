@@ -3,23 +3,29 @@ package ru.yandex.practicum.filmorate.controller;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-import java.util.*;
+import java.util.List;
 
-@RestController
-@RequestMapping("/users")
 @Slf4j
+@RequestMapping("/users")
+@RestController
 public class UserController {
     private final UserService userService;
 
     @Autowired
     public UserController(UserService userService) {
         this.userService = userService;
+    }
+
+    @GetMapping
+    public List<User> getUsers() {
+        List<User> users = userService.getUsers();
+        log.info("Currently {} users registered.", users.size());
+        return users;
     }
 
     @PostMapping
@@ -34,12 +40,6 @@ public class UserController {
         return userService.putUser(user);
     }
 
-    @GetMapping
-    public List<User> getUsers() {
-        List<User> users = userService.getUsers();
-        log.info("Currently {} users registered.", users.size());
-        return users;
-    }
 
     @GetMapping("/{userId}")
     public User findUser(@PathVariable Long userId) {
@@ -48,23 +48,15 @@ public class UserController {
     }
 
     @PutMapping("/{userId}/friends/{friendId}")
-    public User addFriend(@PathVariable Long userId, @PathVariable Long friendId) {
-        if (userId == friendId) {
-            log.error("UserID and FriendID should be different");
-            throw new ValidationException("UserID and FriendID should be different");
-        }
+    public void addFriend(@PathVariable Long userId, @PathVariable Long friendId) {
         log.info("Making friends id {} and {}", userId, friendId);
-        return userService.addFriend(userId, friendId);
+        userService.addFriend(userId, friendId);
     }
 
     @DeleteMapping("/{userId}/friends/{friendId}")
-    public User deleteFriend(@PathVariable Long userId, @PathVariable Long friendId) {
-        if (userId == friendId) {
-            log.error("UserID and FriendID should be different");
-            throw new ValidationException("UserID and FriendID should be different");
-        }
+    public void deleteFriend(@PathVariable Long userId, @PathVariable Long friendId) {
         log.info("Deleting friends id {} and {}", userId, friendId);
-        return userService.deleteFriend(userId, friendId);
+        userService.deleteFriend(userId, friendId);
     }
 
     @GetMapping("{id}/friends")
