@@ -77,4 +77,8 @@ public class UserService {
         log.info("Looking for common friends for {}  and {}", id, otherId);
         return friendsStorage.getCommonFriends(id, otherId);
     }
+
+    public void deleteUser(Long id) {
+        userStorage.deleteUser(id);
+    }
 }

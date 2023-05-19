@@ -75,4 +75,9 @@ public class InMemoryUserStorage implements UserStorage {
         log.info("User found: {}", userFound);
         return userFound;
     }
+
+    @Override
+    public void deleteUser(Long id) {
+        users.remove(id);
+    }
 }
