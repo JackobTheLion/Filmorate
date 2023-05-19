@@ -98,6 +98,11 @@ public class FilmService {
         return popularFilms;
     }
 
+    public void deleteFilm(Long id) {
+        log.info("Deleting film with id {}", id);
+        filmStorage.deleteFilm(id);
+    }
+
     private void setMpaToFilm(Film film) {
         if (film.getMpa() != null && film.getMpa().getId() != 0) {
             Mpa mpa = mpaStorage.findMpa(film.getMpa().getId());

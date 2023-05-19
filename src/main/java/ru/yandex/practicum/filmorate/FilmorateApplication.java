@@ -10,6 +10,4 @@ public class FilmorateApplication {
         SpringApplication.run(FilmorateApplication.class, args);
     }
 
-    //this line is for test purpose
-
 }

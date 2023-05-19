@@ -79,6 +79,7 @@ public class UserService {
     }
 
     public void deleteUser(Long id) {
+        log.info("Deleting user with id {}", id);
         userStorage.deleteUser(id);
     }
 }

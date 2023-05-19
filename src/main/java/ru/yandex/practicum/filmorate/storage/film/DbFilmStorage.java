@@ -9,6 +9,7 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exceptions.FilmNotFoundException;
+import ru.yandex.practicum.filmorate.exceptions.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Mpa;
 
@@ -94,6 +95,18 @@ public class DbFilmStorage implements FilmStorage {
             throw new FilmNotFoundException(String.format("Film wth id %s not found", id));
         }
         return film;
+    }
+
+    @Override
+    public void deleteFilm(Long id) {
+        String sql = "DELETE from films WHERE film_id = ?";
+        int result = jdbcTemplate.update(sql, id);
+        if (result == 1) {
+            log.info("Film with id {} deleted", id);
+        } else {
+            log.info("Film with id {} not found", id);
+            throw new FilmNotFoundException(String.format("Film with id %s not found", id));
+        }
     }
 
     private Film mapFilm(ResultSet rs) throws SQLException {
