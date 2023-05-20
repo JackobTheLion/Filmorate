@@ -69,6 +69,7 @@ public class UserService {
     }
 
     public List<User> getFriends(Long id) {
+        findUser(id);
         log.info("Looking for friend of Id: {}", id);
         return friendsStorage.getFriends(id);
     }
