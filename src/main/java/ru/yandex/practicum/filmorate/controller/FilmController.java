@@ -63,11 +63,11 @@ public class FilmController {
         log.info("Looking for film ID {}", id);
         return filmService.findFilm(id);
     }
+
     @GetMapping("/common")
     public List<Film> getCommonFilms(@RequestParam Long userId, @RequestParam Long friendId) {
         log.info("Request to endpoint userId = {} & friendId = {} ", userId, friendId);
         return filmService.getCommonFilms(userId, friendId);
     }
-
 
 }
