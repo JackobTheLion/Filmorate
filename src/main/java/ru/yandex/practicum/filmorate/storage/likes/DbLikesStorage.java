@@ -55,8 +55,8 @@ public class DbLikesStorage implements LikesStorage {
 
     private Likes mapGenre(ResultSet rs) throws SQLException {
         return Likes.builder()
-                .user_id(rs.getLong("user_id"))
-                .film_id(rs.getLong("film_id"))
+                .userId(rs.getLong("user_id"))
+                .filmId(rs.getLong("film_id"))
                 .build();
     }
 }

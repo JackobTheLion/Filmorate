@@ -56,7 +56,7 @@ public class FilmService {
         for (Film film : films) {
             film.setGenres(genreStorage.getFilmGenres(film.getId()));
             film.setLikes(likesStorage.getLikes(film.getId()).stream()
-                    .map(f -> f.getUser_id())
+                    .map(f -> f.getUserId())
                     .collect(Collectors.toList()));
         }
         log.info("Number of films registered: {}", films.size());
@@ -107,7 +107,7 @@ public class FilmService {
         for (Film film : films) {
             film.setGenres(genreStorage.getFilmGenres(film.getId()));
             film.setLikes(likesStorage.getLikes(film.getId()).stream()
-                    .map(f -> f.getUser_id())
+                    .map(f -> f.getUserId())
                     .collect(Collectors.toList()));
         }
         films = films.stream().sorted((c1, c2) -> Integer.compare(c2.getLikes().size(), c1.getLikes().size()))
