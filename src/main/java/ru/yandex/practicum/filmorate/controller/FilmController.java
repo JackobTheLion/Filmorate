@@ -63,4 +63,10 @@ public class FilmController {
         log.info("Looking for film ID {}", id);
         return filmService.findFilm(id);
     }
+
+    @DeleteMapping("/{id}")
+    public void deleteFilm(@PathVariable Long id) {
+        log.info("Deleting film with id {}", id);
+        filmService.deleteFilm(id);
+    }
 }

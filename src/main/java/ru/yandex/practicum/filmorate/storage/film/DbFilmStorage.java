@@ -96,6 +96,18 @@ public class DbFilmStorage implements FilmStorage {
         return film;
     }
 
+    @Override
+    public void deleteFilm(Long id) {
+        String sql = "DELETE from films WHERE film_id = ?";
+        int result = jdbcTemplate.update(sql, id);
+        if (result == 1) {
+            log.info("Film with id {} deleted", id);
+        } else {
+            log.info("Film with id {} not found", id);
+            throw new FilmNotFoundException(String.format("Film with id %s not found", id));
+        }
+    }
+
     private Film mapFilm(ResultSet rs) throws SQLException {
         return Film.builder()
                 .id(rs.getLong("film_id"))
