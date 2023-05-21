@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.service;
 
+import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -9,31 +10,39 @@ import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
+import ru.yandex.practicum.filmorate.storage.director.DirectorDaoStorage;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
 import ru.yandex.practicum.filmorate.storage.likes.LikesStorage;
 import ru.yandex.practicum.filmorate.storage.mpa.MpaStorage;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
 @Slf4j
+@Builder
 public class FilmService {
     private final FilmStorage filmStorage;
     private final GenreStorage genreStorage;
     private final MpaStorage mpaStorage;
     private final LikesStorage likesStorage;
+    private final DirectorDaoStorage directorStorage;
 
     @Autowired
     public FilmService(@Qualifier("dbStorage") FilmStorage filmStorage,
                        @Qualifier("dbStorage") GenreStorage genreStorage,
                        @Qualifier("dbStorage") MpaStorage mpaStorage,
-                       @Qualifier("dbStorage") LikesStorage likesStorage) {
+                       @Qualifier("dbStorage") LikesStorage likesStorage,
+                       DirectorDaoStorage directorStorage) {
         this.filmStorage = filmStorage;
         this.genreStorage = genreStorage;
         this.mpaStorage = mpaStorage;
         this.likesStorage = likesStorage;
+        this.directorStorage = directorStorage;
     }
 
     public Film addFilm(Film film) {
@@ -121,5 +130,17 @@ public class FilmService {
             film.getGenres().removeAll(duplicateGenres);
         }
         return film;
+    }
+
+    public List<Film> findFilmsByDirector(Long directorId, String sortBy) {
+        if (directorStorage.getDirector(directorId) == null) {
+            throw new NotFoundException("Режиссера с данным id не существует");
+        }
+        List<Film> films = new ArrayList<>();
+        List<Long> filmsId = directorStorage.findFilmsByDirector(directorId, sortBy);
+        for (Long id : filmsId) {
+            films.add(findFilm(id));
+        }
+        return films;
     }
 }
