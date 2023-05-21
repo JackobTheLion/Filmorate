@@ -101,7 +101,6 @@ public class FilmService {
         log.info("Returning top liked films, count {}", count);
         return popularFilms;
     }
-
     public List<Film> getCommonFilms(Long userId, Long friendId) {
         var films = filmStorage.getCommonFilms(userId, friendId);
         for (Film film : films) {
@@ -113,6 +112,12 @@ public class FilmService {
         films = films.stream().sorted((c1, c2) -> Integer.compare(c2.getLikes().size(), c1.getLikes().size()))
                 .collect(Collectors.toList());
         return films;
+    }
+
+    public void deleteFilm(Long id) {
+        log.info("Deleting film with id {}", id);
+        filmStorage.deleteFilm(id);
+
     }
 
     private void setMpaToFilm(Film film) {
