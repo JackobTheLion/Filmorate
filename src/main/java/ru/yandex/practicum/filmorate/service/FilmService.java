@@ -101,6 +101,7 @@ public class FilmService {
         log.info("Returning top liked films, count {}", count);
         return popularFilms;
     }
+
     public List<Film> getCommonFilms(Long userId, Long friendId) {
         var films = filmStorage.getCommonFilms(userId, friendId);
         for (Film film : films) {
