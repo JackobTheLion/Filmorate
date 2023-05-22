@@ -98,6 +98,20 @@ public class FilmService {
         return popularFilms;
     }
 
+    public List<Film> getTopFilms(int count, long genreId, int year) {
+        if (count <= 0) {
+            log.error("Count must be more than zero");
+            throw new IllegalArgumentException("Count must be more than zero");
+        }
+        if (genreId != 0) {
+            genreStorage.findGenre(genreId);
+        }
+        log.info("Looking most popular films with count: {}, genreId: {}, year: {}", count, genreId, year);
+        List<Film> popularFilms = filmStorage.getPopularFilms(count, genreId, year);
+        popularFilms.forEach(film -> film.setGenres(genreStorage.getFilmGenres(film.getId())));
+        return popularFilms;
+    }
+
     private void setMpaToFilm(Film film) {
         if (film.getMpa() != null && film.getMpa().getId() != 0) {
             Mpa mpa = mpaStorage.findMpa(film.getMpa().getId());
@@ -122,4 +136,5 @@ public class FilmService {
         }
         return film;
     }
+
 }
