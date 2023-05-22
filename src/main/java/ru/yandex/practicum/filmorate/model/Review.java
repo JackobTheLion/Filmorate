@@ -8,6 +8,10 @@ import lombok.Data;
 @AllArgsConstructor
 @Builder
 public class Review {
-
-
+    private final int reviewID;
+    private final String content;
+    private final boolean isPositive;
+    private final int userID;
+    private final int filmId;
+    private int useful;
 }
