@@ -8,3 +8,6 @@ CREATE TABLE friends
 
 ALTER TABLE friends
     ADD CONSTRAINT not_self_friend CHECK (user1_id != user2_id);
+
+ALTER TABLE friends
+    ADD CONSTRAINT uniqe_friends UNIQUE (user1_id, user2_id);
