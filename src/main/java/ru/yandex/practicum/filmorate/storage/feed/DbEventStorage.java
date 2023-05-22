@@ -33,49 +33,50 @@ public class DbEventStorage implements EventStorage {
         log.info("Adding event {} to DB", event);
         String sql = "";
         EventType eventType = event.getEventType();
-        log.info("Event type: {}", eventType);
         switch (eventType) {
             case LIKE:
-                sql = "INSERT INTO like_event (timestamp, user_id, operation, like_id) VALUES (?,?,?,?)";
+                sql = "INSERT INTO like_event (user_id, operation, entity_id) VALUES (?,?,?)";
                 break;
             case REVIEW:
-                sql = "INSERT INTO review_event (timestamp, user_id, operation, review_id) VALUES (?,?,?,?)";
+                sql = "INSERT INTO review_event (user_id, operation, entity_id) VALUES (?,?,?)";
                 break;
             case FRIEND:
-                sql = "INSERT INTO friend_event (timestamp, user_id, operation, friendship_id) VALUES (?,?,?,?)";
+                sql = "INSERT INTO friend_event (user_id, operation, entity_id) VALUES (?,?,?)";
         }
         KeyHolder keyHolder = new GeneratedKeyHolder();
         String finalSql = sql;
         jdbcTemplate.update(connection -> {
             PreparedStatement stmt = connection.prepareStatement(finalSql, new String[]{"event_id"});
-            stmt.setTimestamp(1, event.getTimestamp());
-            stmt.setLong(2, event.getUserId());
-            stmt.setString(3, event.getEventType().toString());
-            stmt.setLong(4, event.getEntityId());
+            stmt.setLong(1, event.getUserId());
+            stmt.setString(2, event.getOperation().toString());
+            stmt.setLong(3, event.getEntityId());
             return stmt;
         }, keyHolder);
         event.setEventId(keyHolder.getKey().longValue());
+        log.info("Event id {}", event.getEventId());
         return event;
     }
 
     @Override
     public List<Event> getFeedForUser(Long userId) {
+        log.info("Getting feed for user id {}", userId);
         String sql = "SELECT * FROM " +
                 "(SELECT * FROM LIKE_EVENT " +
                 "UNION SELECT * FROM FRIEND_EVENT " +
-                "UNION SELECT * FROM REVIEW_EVENT) WHERE user_id = ?;";
+                "UNION SELECT * FROM REVIEW_EVENT) WHERE user_id = ? ORDER BY timestamp ASC;";
         List<Event> events = jdbcTemplate.query(sql, (rs, rowNum) -> mapEvent(rs), userId);
+        log.info("{} events registered for user", events.size());
         return events;
     }
 
     private Event mapEvent(ResultSet rs) throws SQLException {
         return Event.builder()
-                .timestamp(rs.getTimestamp("timestamp"))
-                .userId(rs.getLong("userId"))
+                .timestamp(rs.getTimestamp("timestamp").toInstant().toEpochMilli())
+                .userId(rs.getLong("user_id"))
                 .eventType(EventType.valueOf(rs.getString("eventType")))
                 .operation(Operation.valueOf(rs.getString("operation")))
                 .eventId(rs.getLong("event_id"))
-                .entityId(rs.getLong("entityId"))
+                .entityId(rs.getLong("entity_id"))
                 .build();
     }
 }

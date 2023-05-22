@@ -4,25 +4,33 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exceptions.FriendshipRequestExistsException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
+import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.friends.FriendsStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.List;
 
+import static ru.yandex.practicum.filmorate.model.EventType.FRIEND;
+import static ru.yandex.practicum.filmorate.model.Operation.ADD;
+import static ru.yandex.practicum.filmorate.model.Operation.REMOVE;
+
 @Service
 @Slf4j
 public class UserService {
     private final UserStorage userStorage;
-
     private final FriendsStorage friendsStorage;
+    private final FeedService feedService;
 
     @Autowired
     public UserService(@Qualifier("dbStorage") UserStorage userStorage,
-                       @Qualifier("dbStorage") FriendsStorage friendsStorage) {
+                       @Qualifier("dbStorage") FriendsStorage friendsStorage,
+                       FeedService feedService) {
         this.userStorage = userStorage;
         this.friendsStorage = friendsStorage;
+        this.feedService = feedService;
     }
 
     public User addUser(User user) {
@@ -56,7 +64,12 @@ public class UserService {
             throw new ValidationException("UserID and FriendID should be different");
         }
         log.info("Making friends id {} and {}", userId, friendId);
-        friendsStorage.addFriend(userId, friendId);
+        try {
+            friendsStorage.addFriend(userId, friendId);
+            feedService.addEvent(userId, FRIEND, ADD, friendId);
+        } catch (FriendshipRequestExistsException e) {
+            log.info(e.getMessage());
+        }
     }
 
     public void deleteFriend(Long userId, Long friendId) {
@@ -66,6 +79,7 @@ public class UserService {
         }
         log.info("Deleting friends id {} and {}", userId, friendId);
         friendsStorage.removeFriend(userId, friendId);
+        feedService.addEvent(userId, FRIEND, REMOVE, friendId);
     }
 
     public List<User> getFriends(Long id) {
@@ -77,6 +91,12 @@ public class UserService {
     public List<User> getCommonFriends(Long id, Long otherId) {
         log.info("Looking for common friends for {}  and {}", id, otherId);
         return friendsStorage.getCommonFriends(id, otherId);
+    }
+
+    public List<Event> getFeedForUser(Long userId) {
+        log.info("Getting feed for user id {}", userId);
+        findUser(userId);
+        return feedService.getFeedForUser(userId);
     }
 
     public void deleteUser(Long id) {

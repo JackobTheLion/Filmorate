@@ -18,6 +18,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static ru.yandex.practicum.filmorate.model.EventType.LIKE;
+import static ru.yandex.practicum.filmorate.model.Operation.ADD;
+import static ru.yandex.practicum.filmorate.model.Operation.REMOVE;
+
 @Service
 @Slf4j
 public class FilmService {
@@ -25,16 +29,19 @@ public class FilmService {
     private final GenreStorage genreStorage;
     private final MpaStorage mpaStorage;
     private final LikesStorage likesStorage;
+    private final FeedService feedService;
 
     @Autowired
     public FilmService(@Qualifier("dbStorage") FilmStorage filmStorage,
                        @Qualifier("dbStorage") GenreStorage genreStorage,
                        @Qualifier("dbStorage") MpaStorage mpaStorage,
-                       @Qualifier("dbStorage") LikesStorage likesStorage) {
+                       @Qualifier("dbStorage") LikesStorage likesStorage,
+                       FeedService feedService) {
         this.filmStorage = filmStorage;
         this.genreStorage = genreStorage;
         this.mpaStorage = mpaStorage;
         this.likesStorage = likesStorage;
+        this.feedService = feedService;
     }
 
     public Film addFilm(Film film) {
@@ -77,6 +84,7 @@ public class FilmService {
         }
         log.info("Adding like from id {} to film id {}", userId, filmId);
         likesStorage.addLike(filmId, userId);
+        feedService.addEvent(userId, LIKE, ADD, filmId);
     }
 
     public void removeLike(Long filmId, Long userId) {
@@ -87,6 +95,7 @@ public class FilmService {
         log.info("Removing like from user id {} to film id {}", userId, filmId);
         likesStorage.removeLike(filmId, userId);
         log.info("Like from id {} to film {} removed", userId, filmId);
+        feedService.addEvent(userId, LIKE, REMOVE, filmId);
     }
 
     public List<Film> getTopFilms(Integer count) {
@@ -118,7 +127,6 @@ public class FilmService {
     public void deleteFilm(Long id) {
         log.info("Deleting film with id {}", id);
         filmStorage.deleteFilm(id);
-
     }
 
     private void setMpaToFilm(Film film) {
