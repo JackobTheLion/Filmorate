@@ -50,10 +50,10 @@ public class DbLikesStorage implements LikesStorage {
     @Override
     public List<Likes> getLikes(Long filmId) {
         String sql = "SELECT * FROM likes WHERE film_id = ?";
-        return jdbcTemplate.query(sql, (rs, rowNum) -> mapGenre(rs), filmId);
+        return jdbcTemplate.query(sql, (rs, rowNum) -> mapLikes(rs), filmId);
     }
 
-    private Likes mapGenre(ResultSet rs) throws SQLException {
+    private Likes mapLikes(ResultSet rs) throws SQLException {
         return Likes.builder()
                 .userId(rs.getLong("user_id"))
                 .filmId(rs.getLong("film_id"))
