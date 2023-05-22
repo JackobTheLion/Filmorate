@@ -4,8 +4,8 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import ru.yandex.practicum.filmorate.interceptor.LoggerInterceptor;
 
-// Регистрируем interception
 public class MyConfig implements WebMvcConfigurer {
+    // Регистрируем interceptor
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(new LoggerInterceptor());
