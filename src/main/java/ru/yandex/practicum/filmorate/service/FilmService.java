@@ -37,7 +37,7 @@ public class FilmService {
                        @Qualifier("dbStorage") GenreStorage genreStorage,
                        @Qualifier("dbStorage") MpaStorage mpaStorage,
                        @Qualifier("dbStorage") LikesStorage likesStorage,
-                       DirectorDaoStorage directorStorage) {
+                       @Qualifier("dbStorage") DirectorDaoStorage directorStorage) {
         this.filmStorage = filmStorage;
         this.genreStorage = genreStorage;
         this.mpaStorage = mpaStorage;

@@ -10,6 +10,8 @@ import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import javax.validation.Valid;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -19,17 +21,16 @@ import java.util.Map;
 @Component
 public class DirectorDbStorage implements DirectorDaoStorage {
     private final JdbcTemplate jdbcTemplate;
-    private final Mappers mappers;
 
-    public DirectorDbStorage(JdbcTemplate jdbcTemplate, Mappers mappers) {
+
+    public DirectorDbStorage(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
-        this.mappers = mappers;
     }
 
     @Override
     public List<Director> getAll() {
         final String sql = "SELECT * FROM director";
-        return jdbcTemplate.query(sql, (rs, rowNum) -> mappers.makeDirector(rs));
+        return jdbcTemplate.query(sql, (rs, rowNum) -> makeDirector(rs));
     }
 
     @Override
@@ -61,7 +62,7 @@ public class DirectorDbStorage implements DirectorDaoStorage {
     @Override
     public Director getDirector(Long id) {
         final String sql = "SELECT * FROM director WHERE id = ?";
-        return jdbcTemplate.query(sql, (rs, rowNum) -> mappers.makeDirector(rs), id)
+        return jdbcTemplate.query(sql, (rs, rowNum) -> makeDirector(rs), id)
                 .stream()
                 .findAny().orElse(null);
     }
@@ -92,5 +93,12 @@ public class DirectorDbStorage implements DirectorDaoStorage {
             log.error("При попытке создать или обновить режиссера произошла ошибка имени режиссера");
             throw new ValidationException("Имя режиссера не может быть пустым");
         }
+    }
+
+    private Director makeDirector(ResultSet rs) throws SQLException {
+        return Director.builder()
+                .id(rs.getLong("id"))
+                .name(rs.getString("name"))
+                .build();
     }
 }
