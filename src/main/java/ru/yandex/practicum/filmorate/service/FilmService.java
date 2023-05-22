@@ -16,6 +16,7 @@ import ru.yandex.practicum.filmorate.storage.mpa.MpaStorage;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -54,6 +55,9 @@ public class FilmService {
         List<Film> films = filmStorage.getFilms();
         for (Film film : films) {
             film.setGenres(genreStorage.getFilmGenres(film.getId()));
+            film.setLikes(likesStorage.getLikes(film.getId()).stream()
+                    .map(f -> f.getUserId())
+                    .collect(Collectors.toList()));
         }
         log.info("Number of films registered: {}", films.size());
         return films;
@@ -96,6 +100,25 @@ public class FilmService {
         }
         log.info("Returning top liked films, count {}", count);
         return popularFilms;
+    }
+
+    public List<Film> getCommonFilms(Long userId, Long friendId) {
+        var films = filmStorage.getCommonFilms(userId, friendId);
+        for (Film film : films) {
+            film.setGenres(genreStorage.getFilmGenres(film.getId()));
+            film.setLikes(likesStorage.getLikes(film.getId()).stream()
+                    .map(f -> f.getUserId())
+                    .collect(Collectors.toList()));
+        }
+        films = films.stream().sorted((c1, c2) -> Integer.compare(c2.getLikes().size(), c1.getLikes().size()))
+                .collect(Collectors.toList());
+        return films;
+    }
+
+    public void deleteFilm(Long id) {
+        log.info("Deleting film with id {}", id);
+        filmStorage.deleteFilm(id);
+
     }
 
     private void setMpaToFilm(Film film) {
