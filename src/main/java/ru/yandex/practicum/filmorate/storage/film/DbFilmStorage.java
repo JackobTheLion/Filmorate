@@ -82,6 +82,20 @@ public class DbFilmStorage implements FilmStorage {
     }
 
     @Override
+    public List<Film> getCommonFilms(Long userId, Long friendId) {
+        String sql = "SELECT f.*, m.* " +
+                "FROM likes " +
+                "JOIN likes l ON l.film_id = likes.film_id " +
+                "JOIN films f on f.film_id = l.film_id " +
+                "JOIN mpa m on f.mpa_id = m.mpa_id " +
+                "WHERE l.user_id = ? AND likes.user_id = ?";
+
+        List<Film> films = jdbcTemplate.query(sql, (rs, rowNum) -> mapFilm(rs), userId, friendId);
+        log.info("List of common films: {}", films.size());
+        return films;
+    }
+
+    @Override
     public Film findFilm(Long id) {
         log.info("Looking for film: {}", id);
         String sql = "SELECT * FROM films f JOIN mpa m ON f.mpa_id = m.mpa_id WHERE film_id = ?";

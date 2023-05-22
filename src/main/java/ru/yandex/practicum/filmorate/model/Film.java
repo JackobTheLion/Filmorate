@@ -30,4 +30,5 @@ public class Film {
     @NotNull
     private Mpa mpa;
     private List<Genre> genres;
+    private List<Long> likes;
 }

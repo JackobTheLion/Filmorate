@@ -7,6 +7,11 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
+import ru.yandex.practicum.filmorate.model.Likes;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.List;
 
 @Slf4j
 @Component
@@ -40,5 +45,18 @@ public class DbLikesStorage implements LikesStorage {
             throw new NotFoundException(String.format("User with id %s or film with id %s not found", userId, filmId));
         }
         log.info("Like from id {} to film {} removed", userId, filmId);
+    }
+
+    @Override
+    public List<Likes> getLikes(Long filmId) {
+        String sql = "SELECT * FROM likes WHERE film_id = ?";
+        return jdbcTemplate.query(sql, (rs, rowNum) -> mapLikes(rs), filmId);
+    }
+
+    private Likes mapLikes(ResultSet rs) throws SQLException {
+        return Likes.builder()
+                .userId(rs.getLong("user_id"))
+                .filmId(rs.getLong("film_id"))
+                .build();
     }
 }
