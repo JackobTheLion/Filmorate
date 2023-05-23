@@ -15,4 +15,6 @@ public interface FilmStorage {
 
     List<Film> getPopularFilms(Integer limit);
 
+    List<Film> getSearch(String sqlText);
+
 }

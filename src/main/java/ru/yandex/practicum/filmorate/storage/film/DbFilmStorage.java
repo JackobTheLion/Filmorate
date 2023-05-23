@@ -82,6 +82,22 @@ public class DbFilmStorage implements FilmStorage {
     }
 
     @Override
+    public List<Film> getSearch(String sqlText) {
+        String sql = "SELECT f.*, m.* " +
+                "FROM films f " +
+                "LEFT JOIN mpa m ON f.mpa_id = m.mpa_id " +
+                "LEFT JOIN likes l ON l.film_id = f.film_id " +
+                "WHERE " + sqlText +                     // Безопасная инъекция для упрощения жизни всем
+                // В сервис классе выполняется условие по параметрам которые ввёл пользователь,
+                // а в условии разработчик сам пишет какой sql код нужен в данный момент.
+                " GROUP BY f.film_id ORDER BY COUNT(l.user_id) DESC";
+        // TODO Добавить режиссёра в LEFT JOIN
+        List<Film> films = jdbcTemplate.query(sql, (rs, rowNum) -> mapFilm(rs));
+        log.info("Number of search films: {}", films.size());
+        return films;
+    }
+
+    @Override
     public Film findFilm(Long id) {
         log.info("Looking for film: {}", id);
         String sql = "SELECT * FROM films f JOIN mpa m ON f.mpa_id = m.mpa_id WHERE film_id = ?";

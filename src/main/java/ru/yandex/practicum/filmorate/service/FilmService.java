@@ -98,6 +98,37 @@ public class FilmService {
         return popularFilms;
     }
 
+    public List<Film> getSearch(String query, String by) {
+        query = "'%" + query.toLowerCase().replace("_", "\\_").replace("%", "\\%") + "%'";
+        boolean hasTitle, hasDirector;
+        hasTitle = by.contains("title");
+        hasDirector = by.contains("director");
+
+        List<Film> searchList = List.of();
+        if (hasDirector && hasTitle) {
+            log.info("Returning search films. Title, director with text = {}", query);
+            searchList = filmStorage.getSearch("LOWER(f.name) LIKE " + query);
+            //TODO Добавить режиссёра в текст поиска!
+        } else if (hasTitle) {
+            log.info("Returning search films. Title with text = {}", query);
+            searchList = filmStorage.getSearch("LOWER(f.name) LIKE " + query);
+        } else if (hasDirector) {
+            log.info("Returning search films. Director with text = {}", query);
+            //TODO Добавить режиссёра в текст поиска!
+            log.error("DIRECTORS NOT EXIST");
+        } else {
+            log.error("Parameter \"by\" not found by = {} ", by);
+            throw new NotFoundException("Parameter \"by\" is incorrect");
+        }
+
+        searchList.forEach(film -> film.setGenres(genreStorage.getFilmGenres(film.getId())));
+        // Добавление жанров к выводу
+
+        //TODO Добавить режиссёра как жанры!
+
+        return searchList;
+    }
+
     private void setMpaToFilm(Film film) {
         if (film.getMpa() != null && film.getMpa().getId() != 0) {
             Mpa mpa = mpaStorage.findMpa(film.getMpa().getId());
