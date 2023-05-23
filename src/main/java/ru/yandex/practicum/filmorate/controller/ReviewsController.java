@@ -8,6 +8,7 @@ import ru.yandex.practicum.filmorate.service.GenreService;
 import ru.yandex.practicum.filmorate.service.ReviewService;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 
@@ -15,14 +16,14 @@ import java.util.List;
 @RestController
 public class ReviewsController {
 
-    private Review reviewStub = new Review(
+   /* private Review reviewStub = new Review(
             1,
             "My first review",
             true,
             1,
             1,
             10
-    );
+    );*/
 
     private final ReviewService reviewService;
 
@@ -32,12 +33,12 @@ public class ReviewsController {
     }
 
     @PostMapping
-    public Review addReview(@NotNull @RequestBody Review review) {
+    public Review addReview(@NotNull @Valid @RequestBody Review review) {
         return reviewService.addReview(review);
     }
 
     @PutMapping
-    public Review putReview(@NotNull @RequestBody Review review) {
+    public Review putReview(@NotNull @Valid @RequestBody Review review) {
         return reviewService.addReview(review);
     }
 

@@ -3,20 +3,15 @@ package ru.yandex.practicum.filmorate.storage.review;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
-import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exceptions.FilmNotFoundException;
-import ru.yandex.practicum.filmorate.exceptions.MpaNotFoundException;
-import ru.yandex.practicum.filmorate.model.Mpa;
+import ru.yandex.practicum.filmorate.exceptions.ReviewNotFoundException;
+import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Review;
 
-import java.sql.Date;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.List;
 
 @Slf4j
@@ -33,14 +28,34 @@ public class DbReviewStorage implements ReviewStorage {
 
     @Override
     public Review addReview(Review review) {
-        String sql = "INSERT INTO review (CONTENT, ISPOSITIVE, USERID, FILMID, USEFUL) VALUES (?,?,?,?,?)";
-        jdbcTemplate.update(sql,
-                review.getContent(),
-                review.isPositive(),
-                review.getUserID(),
-                review.getFilmId(),
-                review.getUseful()
-        );
+        /*String sql = "INSERT INTO review (CONTENT, ISPOSITIVE, USERID, FILMID, USEFUL) VALUES (?,?,?,?,?)";
+
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+
+        jdbcTemplate.update(connection -> {
+            PreparedStatement stmt = connection.prepareStatement(sql, new String[]{"reviewid"});
+            stmt.setString(1, review.getContent());
+            stmt.setString(2, review.getIsPositive().toString());
+            stmt.setString(3, review.getUserId().toString());
+            stmt.setString(4, review.getFilmId().toString());
+            stmt.setString(5, review.getUseful() + "");
+            return stmt;
+        });*/
+
+        SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
+                .withTableName("review")
+                .usingGeneratedKeyColumns("reviewid");
+
+        try {
+            review.setReviewId(simpleJdbcInsert.executeAndReturnKey(review.toMap()).longValue());
+        } catch (DataIntegrityViolationException e) {
+            throw new ValidationException("Переданы неверные foreign keys");
+        }
+
+        // Если id не быд присвоен
+        if (review.getReviewId() == null) {
+            throw new ValidationException("Ревью не был добавлен в бд. Содержит невалидные данные");
+        }
 
         return review;
     }
@@ -52,13 +67,14 @@ public class DbReviewStorage implements ReviewStorage {
 
         var updatedCount = jdbcTemplate.update(sql,
                 review.getContent(),
-                review.isPositive(),
-                review.getUserID(),
+                review.getIsPositive(),
+                review.getUserId(),
                 review.getFilmId(),
                 review.getUseful()
         );
+
         if (updatedCount == 0) {
-            throw new FilmNotFoundException(String.format("Film with id %s not found", review.getReviewID()));
+            throw new ReviewNotFoundException(String.format("Review with id %s not found", review.getReviewId()));
         }
 
         return review;
