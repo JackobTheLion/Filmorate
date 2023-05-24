@@ -9,6 +9,7 @@ import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
+import ru.yandex.practicum.filmorate.storage.feed.EventStorage;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
 import ru.yandex.practicum.filmorate.storage.likes.LikesStorage;
@@ -29,19 +30,19 @@ public class FilmService {
     private final GenreStorage genreStorage;
     private final MpaStorage mpaStorage;
     private final LikesStorage likesStorage;
-    private final FeedService feedService;
+    private final EventStorage eventStorage;
 
     @Autowired
     public FilmService(@Qualifier("dbStorage") FilmStorage filmStorage,
                        @Qualifier("dbStorage") GenreStorage genreStorage,
                        @Qualifier("dbStorage") MpaStorage mpaStorage,
                        @Qualifier("dbStorage") LikesStorage likesStorage,
-                       FeedService feedService) {
+                       @Qualifier("dbStorage") EventStorage eventStorage) {
         this.filmStorage = filmStorage;
         this.genreStorage = genreStorage;
         this.mpaStorage = mpaStorage;
         this.likesStorage = likesStorage;
-        this.feedService = feedService;
+        this.eventStorage = eventStorage;
     }
 
     public Film addFilm(Film film) {
@@ -84,7 +85,7 @@ public class FilmService {
         }
         log.info("Adding like from id {} to film id {}", userId, filmId);
         likesStorage.addLike(filmId, userId);
-        feedService.addEvent(userId, LIKE, ADD, filmId);
+        eventStorage.addEvent(userId, LIKE, ADD, filmId);
     }
 
     public void removeLike(Long filmId, Long userId) {
@@ -95,7 +96,7 @@ public class FilmService {
         log.info("Removing like from user id {} to film id {}", userId, filmId);
         likesStorage.removeLike(filmId, userId);
         log.info("Like from id {} to film {} removed", userId, filmId);
-        feedService.addEvent(userId, LIKE, REMOVE, filmId);
+        eventStorage.addEvent(userId, LIKE, REMOVE, filmId);
     }
 
     public List<Film> getTopFilms(Integer count) {

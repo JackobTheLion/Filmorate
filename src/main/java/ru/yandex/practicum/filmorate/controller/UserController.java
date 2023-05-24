@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.service.FeedService;
 import ru.yandex.practicum.filmorate.service.UserService;
 
 import javax.validation.Valid;
@@ -17,13 +16,10 @@ import java.util.List;
 @RestController
 public class UserController {
     private final UserService userService;
-    private final FeedService feedService;
 
     @Autowired
-    public UserController(UserService userService,
-                          FeedService feedService) {
+    public UserController(UserService userService) {
         this.userService = userService;
-        this.feedService = feedService;
     }
 
     @GetMapping

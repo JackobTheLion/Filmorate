@@ -8,6 +8,7 @@ import ru.yandex.practicum.filmorate.exceptions.FriendshipRequestExistsException
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.feed.EventStorage;
 import ru.yandex.practicum.filmorate.storage.friends.FriendsStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
@@ -22,15 +23,15 @@ import static ru.yandex.practicum.filmorate.model.Operation.REMOVE;
 public class UserService {
     private final UserStorage userStorage;
     private final FriendsStorage friendsStorage;
-    private final FeedService feedService;
+    private final EventStorage eventStorage;
 
     @Autowired
     public UserService(@Qualifier("dbStorage") UserStorage userStorage,
                        @Qualifier("dbStorage") FriendsStorage friendsStorage,
-                       FeedService feedService) {
+                       @Qualifier("dbStorage") EventStorage eventStorage) {
         this.userStorage = userStorage;
         this.friendsStorage = friendsStorage;
-        this.feedService = feedService;
+        this.eventStorage = eventStorage;
     }
 
     public User addUser(User user) {
@@ -66,7 +67,7 @@ public class UserService {
         log.info("Making friends id {} and {}", userId, friendId);
         try {
             friendsStorage.addFriend(userId, friendId);
-            feedService.addEvent(userId, FRIEND, ADD, friendId);
+            eventStorage.addEvent(userId, FRIEND, ADD, friendId);
         } catch (FriendshipRequestExistsException e) {
             log.info(e.getMessage());
         }
@@ -79,7 +80,7 @@ public class UserService {
         }
         log.info("Deleting friends id {} and {}", userId, friendId);
         friendsStorage.removeFriend(userId, friendId);
-        feedService.addEvent(userId, FRIEND, REMOVE, friendId);
+        eventStorage.addEvent(userId, FRIEND, REMOVE, friendId);
     }
 
     public List<User> getFriends(Long id) {
@@ -96,7 +97,7 @@ public class UserService {
     public List<Event> getFeedForUser(Long userId) {
         log.info("Getting feed for user id {}", userId);
         findUser(userId);
-        return feedService.getFeedForUser(userId);
+        return eventStorage.getFeedForUser(userId);
     }
 
     public void deleteUser(Long id) {

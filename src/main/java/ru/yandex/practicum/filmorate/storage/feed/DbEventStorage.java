@@ -29,10 +29,18 @@ public class DbEventStorage implements EventStorage {
     }
 
     @Override
-    public Event addEvent(Event event) {
+    public Event addEvent(Long userId, EventType eventType, Operation operation, Long entityId) {
+        log.debug("Making event: user id {}, event type {}, operation {}, entity id {}.",
+                userId, eventType, operation, entityId);
+        Event event = Event.builder()
+                .userId(userId)
+                .eventType(eventType)
+                .operation(operation)
+                .entityId(entityId)
+                .build();
         log.info("Adding event {} to DB", event);
+
         String sql = "";
-        EventType eventType = event.getEventType();
         switch (eventType) {
             case LIKE:
                 sql = "INSERT INTO like_event (user_id, operation, entity_id) VALUES (?,?,?)";
