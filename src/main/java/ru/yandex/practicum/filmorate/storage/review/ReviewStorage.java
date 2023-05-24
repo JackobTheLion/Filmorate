@@ -1,10 +1,7 @@
 package ru.yandex.practicum.filmorate.storage.review;
 
-import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.model.Review;
 
-import javax.validation.constraints.NotNull;
 import java.util.List;
 
 public interface ReviewStorage {
@@ -13,17 +10,19 @@ public interface ReviewStorage {
 
     Review updateReview(Review review);
 
-    void deleteReview(Integer id);
+    void deleteReview(Long id);
 
-    Review getReview(Integer id);
+    Review getReview(Long id);
 
-    List<Review> getFilmReviews(Integer filmId, Integer count);
+    List<Review> getFilmReviews(Long filmId, Integer count);
 
-    void addLike(Integer id, Integer userId);
+    void addReviewLiking(Long id, Long userId, Boolean isLiked);
 
-    void addDislike(Integer id, Integer userId);
+    //void addDislike(Integer id, Integer userId);
 
-    void deleteLike(Integer id, Integer userId);
+    void deleteReviewLiking(Long id, Long userId);
 
-    void deleteDislike(Integer id, Integer userId);
+    //void deleteDislike(Integer id, Integer userId);
+
+    List<Review> getReviews(Integer count);
 }

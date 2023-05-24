@@ -28,33 +28,37 @@ public class ReviewService {
         return reviewStorage.updateReview(review);
     }
 
-    public void deleteReview(Integer id) {
+    public void deleteReview(Long id) {
         reviewStorage.deleteReview(id);
     }
 
-    public Review getReview(Integer id) {
+    public Review getReview(Long id) {
         return reviewStorage.getReview(id);
     }
 
-    public List<Review> getFilmReviews(Integer filmId, Integer count) {
+    public List<Review> getFilmReviews(Long filmId, Integer count) {
         return reviewStorage.getFilmReviews(filmId, count);
     }
 
-    public void addLike(Integer id, Integer userId) {
-        reviewStorage.addLike(id, userId);
+    public List<Review> getReviews(Integer count) {
+        return reviewStorage.getReviews(count);
     }
 
-    public void addDislike(Integer id, Integer userId) {
-        reviewStorage.addDislike(id, userId);
+    public void addLike(Long id, Long userId) {
+        reviewStorage.addReviewLiking(id, userId, true);
+    }
+
+    public void addDislike(Long id, Long userId) {
+        reviewStorage.addReviewLiking(id, userId, false);
     }
 
     @DeleteMapping("/{id}/like/{userId}")
-    public void deleteLike(Integer id, Integer userId) {
-        reviewStorage.deleteLike(id, userId);
+    public void deleteLike(Long id, Long userId) {
+        reviewStorage.deleteReviewLiking(id, userId);
     }
 
     @DeleteMapping("/{id}/dislike/{userId}")
-    public void deleteDislike(Integer id, Integer userId) {
-        reviewStorage.deleteDislike(id, userId);
+    public void deleteDislike(Long id, Long userId) {
+        reviewStorage.deleteReviewLiking(id, userId);
     }
 }

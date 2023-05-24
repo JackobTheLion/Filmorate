@@ -3,32 +3,20 @@ package ru.yandex.practicum.filmorate.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Review;
-import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.service.GenreService;
 import ru.yandex.practicum.filmorate.service.ReviewService;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 
 @RequestMapping("/reviews")
 @RestController
-public class ReviewsController {
-
-   /* private Review reviewStub = new Review(
-            1,
-            "My first review",
-            true,
-            1,
-            1,
-            10
-    );*/
+public class ReviewController {
 
     private final ReviewService reviewService;
 
     @Autowired
-    public ReviewsController(ReviewService reviewService) {
+    public ReviewController(ReviewService reviewService) {
         this.reviewService = reviewService;
     }
 
@@ -39,41 +27,45 @@ public class ReviewsController {
 
     @PutMapping
     public Review putReview(@NotNull @Valid @RequestBody Review review) {
-        return reviewService.addReview(review);
+        return reviewService.putReview(review);
     }
 
     @DeleteMapping("/{id}")
-    public void deleteReview(@PathVariable Integer id) {
+    public void deleteReview(@PathVariable Long id) {
         reviewService.deleteReview(id);
     }
 
     @GetMapping("{id}")
-    public Review getReview(@PathVariable Integer id) {
+    public Review getReview(@PathVariable Long id) {
         return reviewService.getReview(id);
     }
 
     @GetMapping()
-    public List<Review> getFilmReviews(@RequestParam(required = false) Integer filmId, @RequestParam(required = false, defaultValue = "10") Integer count) {
-        return reviewService.getFilmReviews(filmId, count);
+    public List<Review> getFilmReviews(@RequestParam(required = false) Long filmId, @RequestParam(required = false, defaultValue = "10") Integer count) {
+        if (filmId == null) {
+            return reviewService.getReviews(count);
+        } else {
+            return reviewService.getFilmReviews(filmId, count);
+        }
     }
 
     @PutMapping("/{id}/like/{userId}")
-    public void addLike(Integer id, Integer userId) {
+    public void addLike(@PathVariable Long id, @PathVariable Long userId) {
         reviewService.addLike(id, userId);
     }
 
     @PutMapping("/{id}/dislike/{userId}")
-    public void addDislike(Integer id, Integer userId) {
+    public void addDislike(@PathVariable Long id, @PathVariable Long userId) {
         reviewService.addDislike(id, userId);
     }
 
     @DeleteMapping("/{id}/like/{userId}")
-    public void deleteLike(Integer id, Integer userId) {
+    public void deleteLike(@PathVariable Long id, @PathVariable Long userId) {
         reviewService.deleteLike(id, userId);
     }
 
     @DeleteMapping("/{id}/dislike/{userId}")
-    public void deleteDislike(Integer id, Integer userId) {
+    public void deleteDislike(@PathVariable Long id, @PathVariable Long userId) {
         reviewService.deleteDislike(id, userId);
     }
 }

@@ -18,9 +18,9 @@ public class Review {
     @NotNull
     private final Boolean isPositive;
     @NotNull
-    private final Integer userId;
+    private final Long userId;
     @NotNull
-    private final Integer filmId;
+    private final Long filmId;
     private int useful;
 
     public Map<String, Object> toMap() {
