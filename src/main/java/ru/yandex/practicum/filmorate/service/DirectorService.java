@@ -1,5 +1,7 @@
 package ru.yandex.practicum.filmorate.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Director;
@@ -8,24 +10,24 @@ import ru.yandex.practicum.filmorate.storage.director.DirectorDaoStorage;
 import java.util.List;
 
 @Service
-public class DirectorService implements FilmorateService<Director> {
+public class DirectorService {
 
     private final DirectorDaoStorage directorStorage;
-
-    public DirectorService(DirectorDaoStorage directorStorage) {
+    @Autowired
+    public DirectorService(@Qualifier("dbStorage") DirectorDaoStorage directorStorage) {
         this.directorStorage = directorStorage;
     }
 
-    @Override
+
     public List<Director> getAll() {
         return directorStorage.getAll();
     }
 
-    @Override
+
     public Director getById(Long id) {
         Director director = directorStorage.getDirector(id);
         if (director == null) {
-            throw new NotFoundException("Режиссера с данным id не существует");
+            throw new NotFoundException("director with that id is not exist");
         }
         return director;
     }
@@ -36,14 +38,14 @@ public class DirectorService implements FilmorateService<Director> {
 
     public void deleteDirector(Long id) {
         if (directorStorage.getDirector(id) == null) {
-            throw new NotFoundException("Режиссера с данным id не существует");
+            throw new NotFoundException("director with that id is not exist");
         }
         directorStorage.deleteDirector(id);
     }
 
     public Director updateDirector(Director director) {
         if (directorStorage.getDirector(director.getId()) == null) {
-            throw new NotFoundException("Режиссера с данным id не существует");
+            throw new NotFoundException("director with that id is not exist");
         }
         return directorStorage.updateDirector(director);
     }

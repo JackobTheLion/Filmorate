@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.storage.director;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
@@ -22,7 +23,7 @@ import java.util.Map;
 public class DirectorDbStorage implements DirectorDaoStorage {
     private final JdbcTemplate jdbcTemplate;
 
-
+    @Autowired
     public DirectorDbStorage(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
@@ -75,7 +76,8 @@ public class DirectorDbStorage implements DirectorDaoStorage {
                 "WHERE director_id = ? " +
                 "GROUP BY fd.film_id " +
                 "ORDER BY p ";
-        String sqlByYear = "SELECT f.id AS film_id FROM film AS f " +
+        String sqlByYear = "SELECT f.id AS film_id " +
+                "FROM film AS f " +
                 "INNER JOIN film_directors AS fd ON f.id = fd.film_id AND fd.director_id = ? " +
                 "ORDER BY f.release_date";
         List<Film> films = new ArrayList<>();
@@ -90,8 +92,8 @@ public class DirectorDbStorage implements DirectorDaoStorage {
 
     public void validation(@Valid @RequestBody Director director) {
         if (director.getName() == null || director.getName().isBlank()) {
-            log.error("При попытке создать или обновить режиссера произошла ошибка имени режиссера");
-            throw new ValidationException("Имя режиссера не может быть пустым");
+            log.error("director name is empty or contain blank");
+            throw new ValidationException("name of director can not be empty");
         }
     }
 
