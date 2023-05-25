@@ -32,6 +32,7 @@ public class Film {
     @NotNull
     private Mpa mpa;
     private List<Genre> genres;
+    private List<Long> likes;
     @Builder.Default
     private Set<Director> directors = new HashSet<>();
 }
