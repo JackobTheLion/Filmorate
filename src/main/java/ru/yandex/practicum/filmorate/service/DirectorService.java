@@ -27,7 +27,7 @@ public class DirectorService {
     public Director getById(Long id) {
         Director director = directorStorage.getDirector(id);
         if (director == null) {
-            throw new NotFoundException("director with that id is not exist");
+            throw new NotFoundException("director with that id does not exist");
         }
         return director;
     }
@@ -38,14 +38,14 @@ public class DirectorService {
 
     public void deleteDirector(Long id) {
         if (directorStorage.getDirector(id) == null) {
-            throw new NotFoundException("director with that id is not exist");
+            throw new NotFoundException("director with that id does not exist");
         }
         directorStorage.deleteDirector(id);
     }
 
     public Director updateDirector(Director director) {
         if (directorStorage.getDirector(director.getId()) == null) {
-            throw new NotFoundException("director with that id is not exist");
+            throw new NotFoundException("director with that id does not exist");
         }
         return directorStorage.updateDirector(director);
     }

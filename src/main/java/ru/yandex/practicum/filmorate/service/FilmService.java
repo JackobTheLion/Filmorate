@@ -134,7 +134,7 @@ public class FilmService {
 
     public List<Film> findFilmsByDirector(Long directorId, String sortBy) {
         if (directorStorage.getDirector(directorId) == null) {
-            throw new NotFoundException("Режиссера с данным id не существует");
+            throw new NotFoundException("director with that id does not exist");
         }
         List<Film> films = new ArrayList<>();
         List<Long> filmsId = directorStorage.findFilmsByDirector(directorId, sortBy);
