@@ -13,6 +13,7 @@ import java.util.List;
 public class DirectorService {
 
     private final DirectorDaoStorage directorStorage;
+
     @Autowired
     public DirectorService(@Qualifier("dbStorage") DirectorDaoStorage directorStorage) {
         this.directorStorage = directorStorage;
