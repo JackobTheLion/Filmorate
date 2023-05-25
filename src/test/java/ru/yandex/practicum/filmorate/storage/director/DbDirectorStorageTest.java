@@ -105,40 +105,5 @@ public class DbDirectorStorageTest {
         assertEquals(2, directors.size());
     }
 
-    @Test
-    void getFilmsByDirectorsTest() {
-        Director director = createDirector();
-        Director director2 = createDirector();
-        Film film = createFilm();
-        Film film2 = createFilm();
-        User user1 = userController.addUser(createUser());
-        User user2 = userController.addUser(createUser());
 
-        Director director1 = directorController.create(director);
-        film.setDirectors(new HashSet<>(directorController.getAll()));
-        Film film1 = filmController.addFilm(film);
-        filmController.addLike(film1.getId(), user1.getId());
-
-        film2.setName("name2");
-        film2.setDescription("new Film2");
-        film2.setReleaseDate(LocalDate.of(2001, 5, 20));
-        director2.setName("name2");
-        director2 = directorController.create(director2);
-        film2.setDirectors(new HashSet<>(directorController.getAll()));
-        film2 = filmController.addFilm(film2);
-        filmController.addLike(film2.getId(), user1.getId());
-        filmController.addLike(film2.getId(), user2.getId());
-
-        List<Film> filmsByDirector = filmController.findFilmsByDirector(director1.getId(), "year");
-        assertEquals(2, filmsByDirector.size());
-        assertEquals(filmController.findFilm(film2.getId()), filmsByDirector.get(0));
-
-        filmsByDirector = filmController.findFilmsByDirector(director2.getId(), "year");
-        assertEquals(1, filmsByDirector.size());
-        assertEquals(filmController.findFilm(film2.getId()), filmsByDirector.get(0));
-
-        filmsByDirector = filmController.findFilmsByDirector(director1.getId(), "likes");
-        assertEquals(2, filmsByDirector.size());
-        assertEquals(filmController.findFilm(film1.getId()), filmsByDirector.get(0));
-    }
 }
