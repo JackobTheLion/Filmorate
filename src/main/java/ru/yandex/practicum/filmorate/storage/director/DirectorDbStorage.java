@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.storage.director;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
@@ -20,6 +21,7 @@ import java.util.Map;
 
 @Slf4j
 @Component
+@Qualifier("dbStorage")
 public class DirectorDbStorage implements DirectorDaoStorage {
     private final JdbcTemplate jdbcTemplate;
 
