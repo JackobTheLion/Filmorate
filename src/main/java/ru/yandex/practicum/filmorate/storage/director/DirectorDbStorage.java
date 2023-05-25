@@ -41,30 +41,30 @@ public class DirectorDbStorage implements DirectorDaoStorage {
         validation(director);
         SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("director")
-                .usingGeneratedKeyColumns("id");
+                .usingGeneratedKeyColumns("director_id");
         Map<String, Object> values = new HashMap<>();
-        values.put("NAME", director.getName());
+        values.put("name", director.getName());
         director.setId(simpleJdbcInsert.executeAndReturnKey(values).longValue());
         return director;
     }
 
     @Override
     public void deleteDirector(Long id) {
-        final String sql = "DELETE FROM director WHERE id = ?";
+        final String sql = "DELETE FROM director WHERE director_id = ?";
         jdbcTemplate.update(sql, id);
     }
 
     @Override
     public Director updateDirector(Director director) {
         validation(director);
-        String sql = "UPDATE director SET name = ? WHERE id = ?";
+        String sql = "UPDATE director SET name = ? WHERE director_id = ?";
         jdbcTemplate.update(sql, director.getName(), director.getId());
         return director;
     }
 
     @Override
     public Director getDirector(Long id) {
-        final String sql = "SELECT * FROM director WHERE id = ?";
+        final String sql = "SELECT * FROM director WHERE director_id = ?";
         return jdbcTemplate.query(sql, (rs, rowNum) -> makeDirector(rs), id)
                 .stream()
                 .findAny().orElse(null);
@@ -101,7 +101,7 @@ public class DirectorDbStorage implements DirectorDaoStorage {
 
     private Director makeDirector(ResultSet rs) throws SQLException {
         return Director.builder()
-                .id(rs.getLong("id"))
+                .id(rs.getLong("director_id"))
                 .name(rs.getString("name"))
                 .build();
     }
