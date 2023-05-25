@@ -1,6 +1,8 @@
 package ru.yandex.practicum.filmorate.model;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
 import ru.yandex.practicum.filmorate.validation.ReleaseDate;
 
 import javax.validation.constraints.Min;
@@ -15,21 +17,19 @@ import java.util.Set;
 
 @Data
 @AllArgsConstructor
-@NoArgsConstructor
-@Builder(toBuilder=true)
-@Setter
+@Builder
 public class Film {
 
     private long id;
     @NotBlank
-    private  String name;
+    private final String name;
     @Size(min = 1, max = 200)
-    private  String description;
+    private final String description;
     @NotNull
     @ReleaseDate
-    private  LocalDate releaseDate;
+    private final LocalDate releaseDate;
     @Min(1)
-    private  long duration;
+    private final long duration;
     @NotNull
     private Mpa mpa;
     private List<Genre> genres;
