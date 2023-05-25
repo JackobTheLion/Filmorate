@@ -16,13 +16,9 @@ public interface ReviewStorage {
 
     List<Review> getFilmReviews(Long filmId, Integer count);
 
-    void addReviewLiking(Long id, Long userId, Boolean isLiked);
+    void addReviewLiking(Long reviewId, Long userId, Boolean isLiked);
 
-    //void addDislike(Integer id, Integer userId);
-
-    void deleteReviewLiking(Long id, Long userId);
-
-    //void deleteDislike(Integer id, Integer userId);
+    void deleteReviewLiking(Long reviewId, Long userId);
 
     List<Review> getReviews(Integer count);
 }
