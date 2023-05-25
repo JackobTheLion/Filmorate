@@ -92,11 +92,12 @@ public class DbGenreStorage implements GenreStorage {
                 .name(rs.getString("name"))
                 .build();
     }
+
     public List<Film> loadFilmsGenre(List<Film> films) {
         log.debug("Запрос к БД на загрузку жанров для нескольких фильмов");
         List<Long> ids = films.stream().map(Film::getId).collect(Collectors.toList());
         Map<Integer, Film> filmMap = new LinkedHashMap<>();
-        for (Film f: films){
+        for (Film f: films) {
             filmMap.put((int) f.getId(),f);
         }
         SqlParameterSource parameters = new MapSqlParameterSource("ids", ids);
