@@ -93,40 +93,40 @@ public class UserService {
         users.remove(currentUser);
         List<Likes> likes = likesStorage.getAllLikes();
 
-        List<Long> currentUserLikes = likes.stream()
+        List<Long> currentUserFilmsIds = likes.stream()
                 .filter(l -> l.getUserId() == userId)
                 .map(l -> l.getFilmId())
                 .collect(Collectors.toList());
 
         int count = 0;//max возможное пересечение
-        List<Long> otherUserLikes = new ArrayList<>();
+        List<Long> filmIdsBuffer = new ArrayList<>();
         for (User user : users) {
-            List<Long> userLikes = likes.stream()//получаем список фильмов кот like user из списка
+            List<Long> userFilmsIds = likes.stream()//получаем список фильмов кот like user из списка
                     .filter(l -> l.getUserId() == user.getId())
                     .map(l -> l.getFilmId())
                     .collect(Collectors.toList());
-            int currentCount = (int) currentUserLikes.stream() // текущий счетчик пересечения
-                    .filter(userLikes::contains)
+            int currentCount = (int) currentUserFilmsIds.stream() // текущий счетчик пересечения
+                    .filter(userFilmsIds::contains)
                     .count();
             if (currentCount > count) {
                 count = currentCount;
-                otherUserLikes = userLikes;
+                filmIdsBuffer = userFilmsIds;
             }
         }
-        List<Long> otherUserLikesNotMatch = otherUserLikes.stream()
-                .filter(newUserFilmId -> currentUserLikes.stream()
+        List<Long> recommendedFilmsIds = filmIdsBuffer.stream()
+                .filter(newUserFilmId -> currentUserFilmsIds.stream()
                         .noneMatch(userFilmId -> newUserFilmId == userFilmId))
                 .collect(Collectors.toList());
 
-        var result = filmStorage.findAllFilmsByIds(otherUserLikesNotMatch);
-        for (Film film : result) {
+        var recommendedFilms = filmStorage.findAllFilmsByIds(recommendedFilmsIds);
+        for (Film film : recommendedFilms) {
             film.setGenres(genreStorage.getFilmGenres(film.getId()));
             film.setLikes(likesStorage.getLikes(film.getId()).stream()
                     .map(f -> f.getUserId())
                     .collect(Collectors.toList()));
         }
 
-        return result;
+        return recommendedFilms;
     }
 
     public List<User> getFriends(Long id) {
