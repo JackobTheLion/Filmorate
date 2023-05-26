@@ -40,24 +40,15 @@ public class DbEventStorage implements EventStorage {
                 .build();
         log.info("Adding event {} to DB", event);
 
-        String sql = "";
-        switch (eventType) {
-            case LIKE:
-                sql = "INSERT INTO like_event (user_id, operation, entity_id) VALUES (?,?,?)";
-                break;
-            case REVIEW:
-                sql = "INSERT INTO review_event (user_id, operation, entity_id) VALUES (?,?,?)";
-                break;
-            case FRIEND:
-                sql = "INSERT INTO friend_event (user_id, operation, entity_id) VALUES (?,?,?)";
-        }
+        String sql = "INSERT INTO events (user_id,eventType, operation, entity_id) VALUES (?,?,?,?)";
+
         KeyHolder keyHolder = new GeneratedKeyHolder();
-        String finalSql = sql;
         jdbcTemplate.update(connection -> {
-            PreparedStatement stmt = connection.prepareStatement(finalSql, new String[]{"event_id"});
+            PreparedStatement stmt = connection.prepareStatement(sql, new String[]{"event_id"});
             stmt.setLong(1, event.getUserId());
-            stmt.setString(2, event.getOperation().toString());
-            stmt.setLong(3, event.getEntityId());
+            stmt.setString(2, event.getEventType().toString());
+            stmt.setString(3, event.getOperation().toString());
+            stmt.setLong(4, event.getEntityId());
             return stmt;
         }, keyHolder);
         event.setEventId(keyHolder.getKey().longValue());
@@ -68,10 +59,7 @@ public class DbEventStorage implements EventStorage {
     @Override
     public List<Event> getFeedForUser(Long userId) {
         log.info("Getting feed for user id {}", userId);
-        String sql = "SELECT * FROM " +
-                "(SELECT * FROM LIKE_EVENT " +
-                "UNION SELECT * FROM FRIEND_EVENT " +
-                "UNION SELECT * FROM REVIEW_EVENT) WHERE user_id = ? ORDER BY timestamp ASC;";
+        String sql = "SELECT * FROM events WHERE user_id = ? ORDER BY timestamp ASC;";
         List<Event> events = jdbcTemplate.query(sql, (rs, rowNum) -> mapEvent(rs), userId);
         log.info("{} events registered for user", events.size());
         return events;
