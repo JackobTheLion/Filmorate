@@ -84,7 +84,7 @@ public class UserService {
         friendsStorage.removeFriend(userId, friendId);
     }
 
-    public List<Film> recomendateFilms(long userId) {
+    public List<Film> recomendFilms(long userId) {
         List<User> users = getUsers();
         User currentUser = users.stream()
                 .filter(u -> u.getId() == userId)
@@ -99,7 +99,7 @@ public class UserService {
                 .collect(Collectors.toList());
 
         int count = 0;//max возможное пересечение
-        List<Long> newUserLikes = new ArrayList<>();
+        List<Long> otherUserLikes = new ArrayList<>();
         for (User user : users) {
             List<Long> userLikes = likes.stream()//получаем список фильмов кот like user из списка
                     .filter(l -> l.getUserId() == user.getId())
@@ -110,15 +110,15 @@ public class UserService {
                     .count();
             if (currentCount > count) {
                 count = currentCount;
-                newUserLikes = userLikes;
+                otherUserLikes = userLikes;
             }
         }
-        List<Long> userFilmsId = newUserLikes.stream()
+        List<Long> otherUserLikesNotMatch = otherUserLikes.stream()
                 .filter(newUserFilmId -> currentUserLikes.stream()
                         .noneMatch(userFilmId -> newUserFilmId == userFilmId))
                 .collect(Collectors.toList());
 
-        var result = filmStorage.findAllById(userFilmsId);
+        var result = filmStorage.findAllFilmsByIds(otherUserLikesNotMatch);
         for (Film film : result) {
             film.setGenres(genreStorage.getFilmGenres(film.getId()));
             film.setLikes(likesStorage.getLikes(film.getId()).stream()
