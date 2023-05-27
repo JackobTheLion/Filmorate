@@ -96,22 +96,22 @@ public class DirectorDbStorage implements DirectorDaoStorage {
     }
 
     @Override
-    public Set<Director> getDirectorsByFilm(Long film_id) {
+    public Set<Director> getDirectorsByFilm(Long filmId) {
         String sql = "SELECT d.director_id, d.name FROM director AS d, film_directors AS fd " +
                 "WHERE d.director_id=fd.director_id AND fd.film_id=?";
         List<Director> list = jdbcTemplate.query(sql, (rs, rowNum) -> Director.builder()
                 .id(rs.getLong(1))
                 .name(rs.getString(2))
-                .build(), film_id);
+                .build(), filmId);
         return Set.copyOf(list);
     }
 
     @Override
-    public void setDirectorsToFilm(Set<Director> directors, Long film_id) {
+    public void setDirectorsToFilm(Set<Director> directors, Long filmId) {
         String del = "DELETE FROM film_directors WHERE film_id=?";
         String ins = "INSERT INTO film_directors (film_id, director_id) VALUES (?,?)";
 
-        jdbcTemplate.update(del, film_id);
+        jdbcTemplate.update(del, filmId);
         if (directors == null || directors.size() == 0) {
             return;
         }
@@ -119,7 +119,7 @@ public class DirectorDbStorage implements DirectorDaoStorage {
         jdbcTemplate.batchUpdate(ins, new BatchPreparedStatementSetter() {
                     @Override
                     public void setValues(PreparedStatement ps, int i) throws SQLException {
-                        ps.setLong(1, film_id);
+                        ps.setLong(1, filmId);
                         ps.setLong(2, list.get(i).getId());
                     }
 
