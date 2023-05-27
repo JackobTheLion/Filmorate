@@ -6,12 +6,10 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestBody;
-import ru.yandex.practicum.filmorate.exceptions.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Director;
@@ -22,30 +20,30 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 @Slf4j
 @Component
 @Qualifier("dbStorage")
-public class DirectorDbStorage implements DirectorDaoStorage {
+public class DirectorStorage implements DbDirectorStorage {
     private final JdbcTemplate jdbcTemplate;
 
     @Autowired
-    public DirectorDbStorage(JdbcTemplate jdbcTemplate) {
+    public DirectorStorage(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 
     @Override
-    public List<Director> getAll() {
+    public List<Director> getAllDirectors() {
+        log.info("Query all Directors");
         final String sql = "SELECT * FROM director";
-        return jdbcTemplate.query(sql, (rs, rowNum) -> makeDirector(rs));
+        return jdbcTemplate.query(sql, (rs, rowNum) -> mapDirector(rs));
     }
 
     @Override
     public Director createDirector(Director director) {
+        log.info("Create Director: {}", director.getName());
         String sql = "INSERT INTO director (name) VALUES (?)";
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
@@ -64,12 +62,14 @@ public class DirectorDbStorage implements DirectorDaoStorage {
 
     @Override
     public void deleteDirector(Long id) {
+        log.info("Delete Director {}", id);
         final String sql = "DELETE FROM director WHERE director_id = ?";
         jdbcTemplate.update(sql, id);
     }
 
     @Override
     public Director updateDirector(Director director) {
+        log.info("Update Director: {}", director);
         validation(director);
         String sql = "UPDATE director SET name = ? WHERE director_id = ?";
         jdbcTemplate.update(sql, director.getName(), director.getId());
@@ -78,10 +78,11 @@ public class DirectorDbStorage implements DirectorDaoStorage {
 
     @Override
     public Director getDirector(Long id) {
+        log.info("Get Director {}", id);
         final String sql = "SELECT * FROM director WHERE director_id = ?";
         Director director;
         try {
-            director = jdbcTemplate.queryForObject(sql, (rs, rowNum) -> makeDirector(rs), id);
+            director = jdbcTemplate.queryForObject(sql, (rs, rowNum) -> mapDirector(rs), id);
         } catch (EmptyResultDataAccessException e) {
             log.error("Director with id {} not found", id);
             throw new NotFoundException(String.format("Director wth id %s not found", id));
@@ -91,6 +92,7 @@ public class DirectorDbStorage implements DirectorDaoStorage {
 
     @Override
     public List<Long> findFilmsByDirector(Long directorId, String sortBy) {
+        log.info("Query findFilmsByDirector director:{} sortBy:{}", directorId, sortBy);
         String sqlByLikes = "SELECT fd.film_id, COUNT(fl.user_id) AS p " +
                 "FROM film_directors AS fd " +
                 "LEFT OUTER JOIN likes AS fl ON fd.film_id = fl.film_id " +
@@ -113,6 +115,7 @@ public class DirectorDbStorage implements DirectorDaoStorage {
 
     @Override
     public Set<Director> getDirectorsByFilm(Long film_id) {
+        log.info("Query getDirectorsByFilm film:{}", film_id);
         String sql = "SELECT d.director_id, d.name FROM director AS d, film_directors AS fd " +
                 "WHERE d.director_id=fd.director_id AND fd.film_id=?";
         List<Director> list = jdbcTemplate.query(sql, (rs, rowNum) -> Director.builder()
@@ -154,7 +157,7 @@ public class DirectorDbStorage implements DirectorDaoStorage {
         }
     }
 
-    private Director makeDirector(ResultSet rs) throws SQLException {
+    private Director mapDirector(ResultSet rs) throws SQLException {
         return Director.builder()
                 .id(rs.getLong("director_id"))
                 .name(rs.getString("name"))

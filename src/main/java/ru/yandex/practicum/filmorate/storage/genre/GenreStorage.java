@@ -16,6 +16,4 @@ public interface GenreStorage {
 
     void removeGenreFromFilm(Film film);
 
-    List<Film> loadFilmsGenre(List<Film> films);
-
 }

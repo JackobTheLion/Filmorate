@@ -92,28 +92,4 @@ public class DbGenreStorage implements GenreStorage {
                 .name(rs.getString("name"))
                 .build();
     }
-
-    public List<Film> loadFilmsGenre(List<Film> films) {
-        log.debug("Запрос к БД на загрузку жанров для нескольких фильмов");
-        List<Long> ids = films.stream().map(Film::getId).collect(Collectors.toList());
-        Map<Integer, Film> filmMap = new LinkedHashMap<>();
-        for (Film f : films) {
-            filmMap.put((int) f.getId(), f);
-        }
-        SqlParameterSource parameters = new MapSqlParameterSource("ids", ids);
-        NamedParameterJdbcTemplate namedJdbcTemplate = new NamedParameterJdbcTemplate(jdbcTemplate);
-
-        String sqlQuery = "SELECT *" +
-                "FROM FILMS_GENRE F " +
-                "INNER JOIN GENRE G on G.GENRE_ID = F.GENRE_ID " +
-                "WHERE FILM_ID IN (:ids)";
-
-        namedJdbcTemplate.query(sqlQuery, parameters, (rs, rowNum) ->
-                filmMap.get(rs.getInt("FILM_ID"))
-                        .getGenres()
-                        .add(mapGenre(rs)));
-
-        return new ArrayList<>(filmMap.values());
-
-    }
 }

@@ -23,17 +23,17 @@ public class DirectorController {
     @GetMapping
     public List<Director> getAll() {
         log.info("GET request");
-        return directorService.getAll();
+        return directorService.getAllDirectors();
     }
 
     @GetMapping("/{id}")
     public Director getDirector(@PathVariable Long id) {
         log.info("GET request /{}", id);
-        return directorService.getById(id);
+        return directorService.getDirectorById(id);
     }
 
     @PostMapping
-    public Director create(@RequestBody @Valid Director director) {
+    public Director createDirector(@RequestBody @Valid Director director) {
         log.info("POST request {}",director);
         return directorService.createDirector(director);
     }
@@ -45,7 +45,7 @@ public class DirectorController {
     }
 
     @PutMapping
-    public Director updateDirector(@RequestBody Director director) {
+    public Director updateDirector(@RequestBody @Valid Director director) {
         log.info("PUT request {}", director);
         return directorService.updateDirector(director);
     }

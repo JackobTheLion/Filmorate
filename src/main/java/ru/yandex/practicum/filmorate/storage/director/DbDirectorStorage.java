@@ -5,9 +5,9 @@ import ru.yandex.practicum.filmorate.model.Director;
 import java.util.List;
 import java.util.Set;
 
-public interface DirectorDaoStorage {
+public interface DbDirectorStorage {
 
-    List<Director> getAll();
+    List<Director> getAllDirectors();
 
     Director createDirector(Director director);
 

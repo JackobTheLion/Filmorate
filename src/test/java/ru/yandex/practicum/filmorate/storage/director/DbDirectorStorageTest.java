@@ -63,7 +63,7 @@ public class DbDirectorStorageTest {
     @Test
     void createTest() {
         Director director = createDirector();
-        Director director1 = directorController.create(director);
+        Director director1 = directorController.createDirector(director);
         director.setId(director1.getId());
         assertEquals(director, director1);
     }
@@ -71,7 +71,7 @@ public class DbDirectorStorageTest {
     @Test
     void updateTest() {
         Director director = createDirector();
-        Director director1 = directorController.create(director);
+        Director director1 = directorController.createDirector(director);
         director1.setName("name2");
         Director director2 = directorController.updateDirector(director1);
         assertEquals(director1, director2);
@@ -80,7 +80,7 @@ public class DbDirectorStorageTest {
     @Test
     void deleteTest() {
         Director director = createDirector();
-        Director director1 = directorController.create(director);
+        Director director1 = directorController.createDirector(director);
         directorController.deleteDirector(director1.getId());
         assertEquals(0, directorController.getAll().size());
     }
@@ -88,7 +88,7 @@ public class DbDirectorStorageTest {
     @Test
     void getDirectorTest() {
         Director director = createDirector();
-        Director director1 = directorController.create(director);
+        Director director1 = directorController.createDirector(director);
         Director director2 = directorController.getDirector(director1.getId());
         assertEquals(director1, director2);
     }
@@ -96,10 +96,10 @@ public class DbDirectorStorageTest {
     @Test
     void getAllDirectorsTest() {
         Director director = createDirector();
-        Director director1 = directorController.create(director);
+        Director director1 = directorController.createDirector(director);
         List<Director> directors = directorController.getAll();
         assertEquals(director1, directors.get(0));
-        Director director2 = directorController.create(director);
+        Director director2 = directorController.createDirector(director);
         directors = directorController.getAll();
         assertEquals(2, directors.size());
     }
