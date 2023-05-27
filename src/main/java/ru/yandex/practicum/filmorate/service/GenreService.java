@@ -27,5 +27,4 @@ public class GenreService {
     public Genre findGenre(Long id) {
         return dbGenreStorage.findGenre(id);
     }
-
 }

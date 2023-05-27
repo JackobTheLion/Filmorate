@@ -3,11 +3,16 @@ package ru.yandex.practicum.filmorate.storage.director;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestBody;
+import ru.yandex.practicum.filmorate.exceptions.FilmNotFoundException;
+import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -41,13 +46,19 @@ public class DirectorDbStorage implements DirectorDaoStorage {
 
     @Override
     public Director createDirector(Director director) {
-        validation(director);
-        SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
-                .withTableName("director")
-                .usingGeneratedKeyColumns("director_id");
-        Map<String, Object> values = new HashMap<>();
-        values.put("name", director.getName());
-        director.setId(simpleJdbcInsert.executeAndReturnKey(values).longValue());
+        String sql = "INSERT INTO director (name) VALUES (?)";
+
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+
+        jdbcTemplate.update(connection -> {
+            PreparedStatement stmt = connection.prepareStatement(sql, new String[]{"director_id"});
+            stmt.setString(1, director.getName());
+            return stmt;
+        }, keyHolder);
+        director.setId(keyHolder.getKey().longValue());
+
+        log.debug("Director added to DB with id {}", director.getId());
+
         return director;
     }
 
@@ -68,9 +79,14 @@ public class DirectorDbStorage implements DirectorDaoStorage {
     @Override
     public Director getDirector(Long id) {
         final String sql = "SELECT * FROM director WHERE director_id = ?";
-        return jdbcTemplate.query(sql, (rs, rowNum) -> makeDirector(rs), id)
-                .stream()
-                .findAny().orElse(null);
+        Director director;
+        try {
+            director = jdbcTemplate.queryForObject(sql, (rs, rowNum) -> makeDirector(rs), id);
+        } catch (EmptyResultDataAccessException e) {
+            log.error("Director with id {} not found", id);
+            throw new NotFoundException(String.format("Director wth id %s not found", id));
+        }
+        return director;
     }
 
     @Override
@@ -96,22 +112,22 @@ public class DirectorDbStorage implements DirectorDaoStorage {
     }
 
     @Override
-    public Set<Director> getDirectorsByFilm(Long filmId) {
+    public Set<Director> getDirectorsByFilm(Long film_id) {
         String sql = "SELECT d.director_id, d.name FROM director AS d, film_directors AS fd " +
                 "WHERE d.director_id=fd.director_id AND fd.film_id=?";
         List<Director> list = jdbcTemplate.query(sql, (rs, rowNum) -> Director.builder()
                 .id(rs.getLong(1))
                 .name(rs.getString(2))
-                .build(), filmId);
+                .build(), film_id);
         return Set.copyOf(list);
     }
 
     @Override
-    public void setDirectorsToFilm(Set<Director> directors, Long filmId) {
+    public void setDirectorsToFilm(Set<Director> directors, Long film_id) {
         String del = "DELETE FROM film_directors WHERE film_id=?";
         String ins = "INSERT INTO film_directors (film_id, director_id) VALUES (?,?)";
 
-        jdbcTemplate.update(del, filmId);
+        jdbcTemplate.update(del, film_id);
         if (directors == null || directors.size() == 0) {
             return;
         }
@@ -119,7 +135,7 @@ public class DirectorDbStorage implements DirectorDaoStorage {
         jdbcTemplate.batchUpdate(ins, new BatchPreparedStatementSetter() {
                     @Override
                     public void setValues(PreparedStatement ps, int i) throws SQLException {
-                        ps.setLong(1, filmId);
+                        ps.setLong(1, film_id);
                         ps.setLong(2, list.get(i).getId());
                     }
 

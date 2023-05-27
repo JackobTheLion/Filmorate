@@ -70,15 +70,6 @@ public class FilmService {
         return films;
     }
 
-    private Film enrichFilm(Film film) {
-        film.setGenres(genreStorage.getFilmGenres(film.getId()));
-        film.setLikes(likesStorage.getLikes(film.getId()).stream()
-                .map(f -> f.getUserId())
-                .collect(Collectors.toList()));
-        film.setDirectors(directorStorage.getDirectorsByFilm(film.getId()));
-        return film;
-    }
-
     public Film findFilm(Long id) {
         log.info("Looking for film with id: {}", id);
         Film film = filmStorage.findFilm(id);
@@ -134,6 +125,27 @@ public class FilmService {
 
     }
 
+    public List<Film> findFilmsByDirector(Long directorId, String sortBy) {
+        if (directorStorage.getDirector(directorId) == null) {
+            throw new NotFoundException("director with that id does not exist");
+        }
+        List<Film> films = new ArrayList<>();
+        List<Long> filmsId = directorStorage.findFilmsByDirector(directorId, sortBy);
+        for (Long id : filmsId) {
+            films.add(findFilm(id));
+        }
+        return films;
+    }
+
+    private Film enrichFilm(Film film) {
+        film.setGenres(genreStorage.getFilmGenres(film.getId()));
+        film.setLikes(likesStorage.getLikes(film.getId()).stream()
+                .map(f -> f.getUserId())
+                .collect(Collectors.toList()));
+        film.setDirectors(directorStorage.getDirectorsByFilm(film.getId()));
+        return film;
+    }
+
     private void setMpaToFilm(Film film) {
         if (film.getMpa() != null && film.getMpa().getId() != 0) {
             Mpa mpa = mpaStorage.findMpa(film.getMpa().getId());
@@ -157,17 +169,5 @@ public class FilmService {
             film.getGenres().removeAll(duplicateGenres);
         }
         return film;
-    }
-
-    public List<Film> findFilmsByDirector(Long directorId, String sortBy) {
-        if (directorStorage.getDirector(directorId) == null) {
-            throw new NotFoundException("director with that id does not exist");
-        }
-        List<Film> films = new ArrayList<>();
-        List<Long> filmsId = directorStorage.findFilmsByDirector(directorId, sortBy);
-        for (Long id : filmsId) {
-            films.add(findFilm(id));
-        }
-        return films;
     }
 }

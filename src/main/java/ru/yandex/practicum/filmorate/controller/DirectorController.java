@@ -22,26 +22,31 @@ public class DirectorController {
 
     @GetMapping
     public List<Director> getAll() {
+        log.info("GET request");
         return directorService.getAll();
     }
 
     @GetMapping("/{id}")
     public Director getDirector(@PathVariable Long id) {
+        log.info("GET request /{}", id);
         return directorService.getById(id);
     }
 
     @PostMapping
     public Director create(@RequestBody @Valid Director director) {
+        log.info("POST request {}",director);
         return directorService.createDirector(director);
     }
 
     @DeleteMapping("/{id}")
     public void deleteDirector(@PathVariable Long id) {
+        log.info("DELETE request /{}",id);
         directorService.deleteDirector(id);
     }
 
     @PutMapping
     public Director updateDirector(@RequestBody Director director) {
+        log.info("PUT request {}", director);
         return directorService.updateDirector(director);
     }
 

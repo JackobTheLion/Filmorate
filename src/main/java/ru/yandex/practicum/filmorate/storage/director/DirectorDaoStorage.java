@@ -19,8 +19,8 @@ public interface DirectorDaoStorage {
 
     List<Long> findFilmsByDirector(Long directorId, String sortBy);
 
-    Set<Director> getDirectorsByFilm(Long filmId);
+    Set<Director> getDirectorsByFilm(Long film_id);
 
-    void setDirectorsToFilm(Set<Director> directors, Long filmId);
+    void setDirectorsToFilm(Set<Director> directors, Long film_id);
 
 }
