@@ -97,8 +97,8 @@ public class DbGenreStorage implements GenreStorage {
         log.debug("Запрос к БД на загрузку жанров для нескольких фильмов");
         List<Long> ids = films.stream().map(Film::getId).collect(Collectors.toList());
         Map<Integer, Film> filmMap = new LinkedHashMap<>();
-        for (Film f: films) {
-            filmMap.put((int) f.getId(),f);
+        for (Film f : films) {
+            filmMap.put((int) f.getId(), f);
         }
         SqlParameterSource parameters = new MapSqlParameterSource("ids", ids);
         NamedParameterJdbcTemplate namedJdbcTemplate = new NamedParameterJdbcTemplate(jdbcTemplate);

@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.storage.director;
 import ru.yandex.practicum.filmorate.model.Director;
 
 import java.util.List;
+import java.util.Set;
 
 public interface DirectorDaoStorage {
 
@@ -17,5 +18,9 @@ public interface DirectorDaoStorage {
     Director getDirector(Long id);
 
     List<Long> findFilmsByDirector(Long directorId, String sortBy);
+
+    Set<Director> getDirectorsByFilm(Long film_id);
+
+    void setDirectorsToFilm(Set<Director> directors, Long film_id);
 
 }

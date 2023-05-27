@@ -47,32 +47,42 @@ public class FilmService {
         log.info("Trying to add film {}", film);
         filmStorage.addFilm(film);
         setMpaToFilm(film);
-        return updateFilmGenres(film);
+        updateFilmGenres(film);
+        directorStorage.setDirectorsToFilm(film.getDirectors(), film.getId());
+        return findFilm(film.getId());
     }
 
     public Film putFilm(Film film) {
         log.info("Trying to put film {}", film);
         filmStorage.putFilm(film);
         setMpaToFilm(film);
-        return updateFilmGenres(film);
+        updateFilmGenres(film);
+        directorStorage.setDirectorsToFilm(film.getDirectors(), film.getId());
+        return findFilm(film.getId());
     }
 
     public List<Film> getFilms() {
         List<Film> films = filmStorage.getFilms();
         for (Film film : films) {
-            film.setGenres(genreStorage.getFilmGenres(film.getId()));
-            film.setLikes(likesStorage.getLikes(film.getId()).stream()
-                    .map(f -> f.getUserId())
-                    .collect(Collectors.toList()));
+            enrichFilm(film);
         }
         log.info("Number of films registered: {}", films.size());
         return films;
     }
 
+    private Film enrichFilm(Film film) {
+        film.setGenres(genreStorage.getFilmGenres(film.getId()));
+        film.setLikes(likesStorage.getLikes(film.getId()).stream()
+                .map(f -> f.getUserId())
+                .collect(Collectors.toList()));
+        film.setDirectors(directorStorage.getDirectorsByFilm(film.getId()));
+        return film;
+    }
+
     public Film findFilm(Long id) {
         log.info("Looking for film with id: {}", id);
         Film film = filmStorage.findFilm(id);
-        film.setGenres(genreStorage.getFilmGenres(film.getId()));
+        enrichFilm(film);
         return film;
     }
 
@@ -102,7 +112,7 @@ public class FilmService {
         }
         List<Film> popularFilms = filmStorage.getPopularFilms(count);
         for (Film film : popularFilms) {
-            film.setGenres(genreStorage.getFilmGenres(film.getId()));
+            enrichFilm(film);
         }
         log.info("Returning top liked films, count {}", count);
         return popularFilms;
@@ -111,10 +121,7 @@ public class FilmService {
     public List<Film> getCommonFilms(Long userId, Long friendId) {
         var films = filmStorage.getCommonFilms(userId, friendId);
         for (Film film : films) {
-            film.setGenres(genreStorage.getFilmGenres(film.getId()));
-            film.setLikes(likesStorage.getLikes(film.getId()).stream()
-                    .map(f -> f.getUserId())
-                    .collect(Collectors.toList()));
+            enrichFilm(film);
         }
         films = films.stream().sorted((c1, c2) -> Integer.compare(c2.getLikes().size(), c1.getLikes().size()))
                 .collect(Collectors.toList());
