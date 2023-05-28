@@ -21,4 +21,5 @@ public interface FilmStorage {
 
     List<Film> getSearch(String sqlText);
 
+    List<Film> findAllFilmsByIds(List<Long> ids);
 }

@@ -53,6 +53,12 @@ public class DbLikesStorage implements LikesStorage {
         return jdbcTemplate.query(sql, (rs, rowNum) -> mapLikes(rs), filmId);
     }
 
+    @Override
+    public List<Likes> getAllLikes() {
+        String sql = "SELECT * FROM likes";
+        return jdbcTemplate.query(sql, (rs, rowNum) -> mapLikes(rs));
+    }
+
     private Likes mapLikes(ResultSet rs) throws SQLException {
         return Likes.builder()
                 .userId(rs.getLong("user_id"))

@@ -5,6 +5,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
@@ -24,10 +26,12 @@ import java.util.List;
 public class DbFilmStorage implements FilmStorage {
 
     private final JdbcTemplate jdbcTemplate;
+    private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
     @Autowired
     public DbFilmStorage(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
+        this.namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(jdbcTemplate);
     }
 
     @Override
@@ -125,6 +129,13 @@ public class DbFilmStorage implements FilmStorage {
             throw new FilmNotFoundException(String.format("Film wth id %s not found", id));
         }
         return film;
+    }
+
+    @Override
+    public List<Film> findAllFilmsByIds(List<Long> ids) {
+        var sqlQuery = "SELECT * FROM films f LEFT JOIN mpa m ON f.mpa_id = m.mpa_id WHERE film_id IN (:ids)";
+        var idsParams = new MapSqlParameterSource("ids", ids);
+        return namedParameterJdbcTemplate.query(sqlQuery, idsParams, (rs, rowNum) -> mapFilm(rs));
     }
 
     @Override
