@@ -7,6 +7,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.exceptions.FriendshipRequestExistsException;
 import ru.yandex.practicum.filmorate.exceptions.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 
@@ -32,7 +33,9 @@ public class DbFriendsStorage implements FriendsStorage {
         SqlRowSet rsDirect = jdbcTemplate.queryForRowSet(sql, userId, friendId);
         SqlRowSet rsReverse = jdbcTemplate.queryForRowSet(sql, friendId, userId);
         if (rsDirect.next() && rsDirect.getInt("count") > 0) {
-            log.info("Friendship request already exist.");
+            log.info("Friendship request from {}} to {} already exist.", userId, friendId);
+            throw new FriendshipRequestExistsException(String.format("Friendship request from %s to %s already exist.",
+                    userId, friendId));
         } else if (rsReverse.next() && rsReverse.getInt("count") > 0) {
             String sqlUpdate = "UPDATE friends SET confirmed = true WHERE user1_id = ? AND user2_id = ?";
             jdbcTemplate.update(sqlUpdate, friendId, userId);
