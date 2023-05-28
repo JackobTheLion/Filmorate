@@ -78,6 +78,18 @@ public class DbUserStorage implements UserStorage {
         }
     }
 
+    @Override
+    public void deleteUser(Long id) {
+        String sql = "DELETE from filmorate_users WHERE user_id = ?";
+        int result = jdbcTemplate.update(sql, id);
+        if (result == 1) {
+            log.info("User with id {} deleted", id);
+        } else {
+            log.info("User with id {} not found", id);
+            throw new UserNotFoundException(String.format("User with id %s not found", id));
+        }
+    }
+
     private User mapUser(ResultSet rs) throws SQLException {
         return User.builder()
                 .id(rs.getLong("user_id"))

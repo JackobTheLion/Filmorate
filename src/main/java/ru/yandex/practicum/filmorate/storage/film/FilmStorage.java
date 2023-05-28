@@ -15,5 +15,9 @@ public interface FilmStorage {
 
     List<Film> getPopularFilms(Integer limit);
 
+    List<Film> getCommonFilms(Long userId, Long friendId);
+
+    void deleteFilm(Long id);
+
     List<Film> getPopularFilms(Integer limit, Long genreId, Integer year);
 }
