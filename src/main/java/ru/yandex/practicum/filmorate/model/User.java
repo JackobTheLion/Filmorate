@@ -10,10 +10,7 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Past;
 import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 @Data
 @AllArgsConstructor
@@ -30,6 +27,7 @@ public class User {
     private final LocalDate birthday;
     @JsonIgnore
     private final Set<Long> friends = new HashSet<>();
+    private List<Long> likes;//список айди фильмов которые лайкнул пользователь
 
     public Map<String, Object> toMap() {
         Map<String, Object> values = new HashMap<>();

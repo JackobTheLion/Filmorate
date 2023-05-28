@@ -9,7 +9,8 @@ import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
-import ru.yandex.practicum.filmorate.storage.director.DbDirectorStorage;
+import ru.yandex.practicum.filmorate.storage.director.DirectorStorage;
+import ru.yandex.practicum.filmorate.storage.feed.EventStorage;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
 import ru.yandex.practicum.filmorate.storage.likes.LikesStorage;
@@ -19,6 +20,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static ru.yandex.practicum.filmorate.model.EventType.LIKE;
+import static ru.yandex.practicum.filmorate.model.Operation.ADD;
+import static ru.yandex.practicum.filmorate.model.Operation.REMOVE;
+
 @Service
 @Slf4j
 public class FilmService {
@@ -26,18 +31,21 @@ public class FilmService {
     private final GenreStorage genreStorage;
     private final MpaStorage mpaStorage;
     private final LikesStorage likesStorage;
-    private final DbDirectorStorage directorStorage;
+    private final EventStorage eventStorage;
+    private final DirectorStorage directorStorage;
 
     @Autowired
     public FilmService(@Qualifier("dbStorage") FilmStorage filmStorage,
                        @Qualifier("dbStorage") GenreStorage genreStorage,
                        @Qualifier("dbStorage") MpaStorage mpaStorage,
                        @Qualifier("dbStorage") LikesStorage likesStorage,
-                       @Qualifier("dbStorage") DbDirectorStorage directorStorage) {
+                       @Qualifier("dbStorage") EventStorage eventStorage,
+                       @Qualifier("dbStorage") DirectorStorage directorStorage) {
         this.filmStorage = filmStorage;
         this.genreStorage = genreStorage;
         this.mpaStorage = mpaStorage;
         this.likesStorage = likesStorage;
+        this.eventStorage = eventStorage;
         this.directorStorage = directorStorage;
     }
 
@@ -82,6 +90,7 @@ public class FilmService {
         }
         log.info("Adding like from id {} to film id {}", userId, filmId);
         likesStorage.addLike(filmId, userId);
+        eventStorage.addEvent(userId, LIKE, ADD, filmId);
     }
 
     public void removeLike(Long filmId, Long userId) {
@@ -92,6 +101,7 @@ public class FilmService {
         log.info("Removing like from user id {} to film id {}", userId, filmId);
         likesStorage.removeLike(filmId, userId);
         log.info("Like from id {} to film {} removed", userId, filmId);
+        eventStorage.addEvent(userId, LIKE, REMOVE, filmId);
     }
 
     public List<Film> getTopFilms(Integer count) {
@@ -120,7 +130,6 @@ public class FilmService {
     public void deleteFilm(Long id) {
         log.info("Deleting film with id {}", id);
         filmStorage.deleteFilm(id);
-
     }
 
     public List<Film> findFilmsByDirector(Long directorId, String sortBy) {
