@@ -136,4 +136,5 @@ public class DbUserStorageTest {
         List<User> users = userStorage.getUsers();
         assertTrue(users.isEmpty());
     }
+    
 }
