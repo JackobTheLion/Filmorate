@@ -150,27 +150,23 @@ public class FilmService {
         hasTitle = by.contains("title");
         hasDirector = by.contains("director");
 
-        List<Film> searchList = List.of();
+        List<Film> searchList;
         if (hasDirector && hasTitle) {
             log.info("Returning search films. Title, director with text = {}", query);
-            searchList = filmStorage.getSearch("LOWER(f.name) LIKE " + query);
-            //TODO Добавить режиссёра в текст поиска!
+            searchList = filmStorage.getSearch("LOWER(f.name) LIKE " + query + " OR LOWER(d.name) LIKE " + query);
         } else if (hasTitle) {
             log.info("Returning search films. Title with text = {}", query);
             searchList = filmStorage.getSearch("LOWER(f.name) LIKE " + query);
         } else if (hasDirector) {
             log.info("Returning search films. Director with text = {}", query);
-            //TODO Добавить режиссёра в текст поиска!
-            log.error("DIRECTORS NOT EXIST");
+            searchList = filmStorage.getSearch("LOWER(d.name) LIKE " + query);
         } else {
             log.error("Parameter \"by\" not found by = {} ", by);
             throw new NotFoundException("Parameter \"by\" is incorrect");
         }
 
-        searchList.forEach(film -> film.setGenres(genreStorage.getFilmGenres(film.getId())));
-        // Добавление жанров к выводу
+        searchList.forEach(film -> enrichFilm(film));
 
-        //TODO Добавить режиссёра как жанры!
 
         return searchList;
     }
