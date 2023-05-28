@@ -9,7 +9,7 @@ import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
-import ru.yandex.practicum.filmorate.storage.director.DbDirectorStorage;
+import ru.yandex.practicum.filmorate.storage.director.DirectorStorage;
 import ru.yandex.practicum.filmorate.storage.feed.EventStorage;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
@@ -32,20 +32,21 @@ public class FilmService {
     private final MpaStorage mpaStorage;
     private final LikesStorage likesStorage;
     private final EventStorage eventStorage;
-    private final DbDirectorStorage directorStorage;
+    private final DirectorStorage directorStorage;
 
     @Autowired
     public FilmService(@Qualifier("dbStorage") FilmStorage filmStorage,
                        @Qualifier("dbStorage") GenreStorage genreStorage,
                        @Qualifier("dbStorage") MpaStorage mpaStorage,
                        @Qualifier("dbStorage") LikesStorage likesStorage,
-                       @Qualifier("dbStorage") EventStorage eventStorage) {
-                       @Qualifier("dbStorage") DbDirectorStorage directorStorage) {
+                       @Qualifier("dbStorage") EventStorage eventStorage,
+                       @Qualifier("dbStorage") DirectorStorage directorStorage) {
         this.filmStorage = filmStorage;
         this.genreStorage = genreStorage;
         this.mpaStorage = mpaStorage;
         this.likesStorage = likesStorage;
         this.eventStorage = eventStorage;
+        this.directorStorage = directorStorage;
     }
 
     public Film addFilm(Film film) {

@@ -34,13 +34,13 @@ public class DirectorController {
 
     @PostMapping
     public Director createDirector(@RequestBody @Valid Director director) {
-        log.info("POST request {}",director);
+        log.info("POST request {}", director);
         return directorService.createDirector(director);
     }
 
     @DeleteMapping("/{id}")
     public void deleteDirector(@PathVariable Long id) {
-        log.info("DELETE request /{}",id);
+        log.info("DELETE request /{}", id);
         directorService.deleteDirector(id);
     }
 
