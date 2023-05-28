@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Director;
-import ru.yandex.practicum.filmorate.storage.director.DbDirectorStorage;
+import ru.yandex.practicum.filmorate.storage.director.DirectorStorage;
 
 import java.util.List;
 
@@ -14,10 +14,10 @@ import java.util.List;
 @Service
 public class DirectorService {
 
-    private final DbDirectorStorage directorStorage;
+    private final DirectorStorage directorStorage;
 
     @Autowired
-    public DirectorService(@Qualifier("dbStorage") DbDirectorStorage directorStorage) {
+    public DirectorService(@Qualifier("dbStorage") DirectorStorage directorStorage) {
         this.directorStorage = directorStorage;
     }
 
