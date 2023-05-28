@@ -69,6 +69,7 @@ public class UserService {
     }
 
     public List<User> getFriends(Long id) {
+        findUser(id);
         log.info("Looking for friend of Id: {}", id);
         return friendsStorage.getFriends(id);
     }
@@ -76,5 +77,10 @@ public class UserService {
     public List<User> getCommonFriends(Long id, Long otherId) {
         log.info("Looking for common friends for {}  and {}", id, otherId);
         return friendsStorage.getCommonFriends(id, otherId);
+    }
+
+    public void deleteUser(Long id) {
+        log.info("Deleting user with id {}", id);
+        userStorage.deleteUser(id);
     }
 }

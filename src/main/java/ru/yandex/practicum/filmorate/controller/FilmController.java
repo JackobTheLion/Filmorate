@@ -70,4 +70,21 @@ public class FilmController {
         log.info("Looking for film ID {}", id);
         return filmService.findFilm(id);
     }
+
+    @GetMapping("/common")
+    public List<Film> getCommonFilms(@RequestParam Long userId, @RequestParam Long friendId) {
+        log.info("Request commmon films with userId = {} & friendId = {} ", userId, friendId);
+        return filmService.getCommonFilms(userId, friendId);
+    }
+
+    @DeleteMapping("/{id}")
+    public void deleteFilm(@PathVariable Long id) {
+        log.info("Deleting film with id {}", id);
+        filmService.deleteFilm(id);
+    }
+
+    @GetMapping("/director/{directorId}")
+    public List<Film> findFilmsByDirector(@PathVariable Long directorId, @RequestParam(required = false) String sortBy) {
+        return filmService.findFilmsByDirector(directorId, sortBy);
+    }
 }
