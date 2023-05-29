@@ -117,6 +117,49 @@ public class DbFilmStorage implements FilmStorage {
     }
 
     @Override
+    public List<Film> getPopularFilms(Integer limit, Long genreId, Integer year) {
+        String sql;
+        List<Film> films;
+        if (genreId != 0 && year != 0) {
+            sql = "SELECT f.*, m.* " +
+                    "FROM films f " +
+                    "LEFT JOIN mpa m ON f.mpa_id = m.mpa_id " +
+                    "LEFT JOIN film_genre fg ON f.film_id = fg.film_id " +
+                    "LEFT JOIN genre g ON fg.genre_id = g.genre_id " +
+                    "LEFT JOIN likes l ON l.film_id = f.film_id " +
+                    "WHERE EXTRACT(YEAR FROM f.release_date) = ? AND g.genre_id = ? " +
+                    "GROUP BY f.film_id ORDER BY COUNT(l.user_id) DESC " +
+                    "LIMIT ?";
+            films = jdbcTemplate.query(sql, (rs, rowNum) -> mapFilm(rs), year, genreId, limit);
+        } else if (genreId == 0) {
+            sql = "SELECT f.*, m.* " +
+                    "FROM films f " +
+                    "LEFT JOIN mpa m ON f.mpa_id = m.mpa_id " +
+                    "LEFT JOIN film_genre fg ON f.film_id = fg.film_id " +
+                    "LEFT JOIN genre g ON fg.genre_id = g.genre_id " +
+                    "LEFT JOIN likes l ON l.film_id = f.film_id " +
+                    "WHERE EXTRACT(YEAR FROM f.release_date) = ?" +
+                    "GROUP BY f.film_id ORDER BY COUNT(l.user_id) DESC " +
+                    "LIMIT ?";
+            films = jdbcTemplate.query(sql, (rs, rowNum) -> mapFilm(rs), year, limit);
+        } else {
+            sql = "SELECT f.*, m.* " +
+                    "FROM films f " +
+                    "LEFT JOIN mpa m ON f.mpa_id = m.mpa_id " +
+                    "LEFT JOIN film_genre fg ON f.film_id = fg.film_id " +
+                    "LEFT JOIN genre g ON fg.genre_id = g.genre_id " +
+                    "LEFT JOIN likes l ON l.film_id = f.film_id " +
+                    "WHERE g.genre_id = ? " +
+                    "GROUP BY f.film_id ORDER BY COUNT(l.user_id) DESC " +
+                    "LIMIT ?";
+            films = jdbcTemplate.query(sql, (rs, rowNum) -> mapFilm(rs), genreId, limit);
+        }
+
+        log.info("Number of most populars films: {}", films.size());
+        return films;
+    }
+
+    @Override
     public Film findFilm(Long id) {
         log.info("Looking for film: {}", id);
         String sql = "SELECT * FROM films f JOIN mpa m ON f.mpa_id = m.mpa_id WHERE film_id = ?";

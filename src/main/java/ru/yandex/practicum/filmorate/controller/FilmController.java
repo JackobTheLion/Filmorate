@@ -8,6 +8,7 @@ import ru.yandex.practicum.filmorate.service.FilmService;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Positive;
 import java.util.List;
 
 @RestController
@@ -53,9 +54,16 @@ public class FilmController {
     }
 
     @GetMapping("/popular")
-    public List<Film> findPopularFilms(@RequestParam(required = false, defaultValue = "10") Integer count) {
-        log.info("Showing top {} films", count);
-        return filmService.getTopFilms(count);
+    public List<Film> findPopularFilms(@RequestParam(required = false, defaultValue = "10") Integer count,
+                                       @RequestParam(required = false, defaultValue = "0") Long genreId,
+                                       @RequestParam(required = false, defaultValue = "0") @Positive Integer year) {
+        if (genreId == 0 && year == 0) {
+            log.info("Showing top {} films", count);
+            return filmService.getTopFilms(count);
+        } else {
+            log.info("Looking top with count: {}, genreId: {}, year: {} ", count, genreId, year);
+            return filmService.getTopFilms(count, genreId, year);
+        }
     }
 
     @GetMapping("/search")
