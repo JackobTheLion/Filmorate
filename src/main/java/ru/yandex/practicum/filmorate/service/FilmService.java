@@ -165,6 +165,7 @@ public class FilmService {
         List<Film> popularFilms = filmStorage.getPopularFilms(count, genreId, year);
         popularFilms.forEach(film -> film.setGenres(genreStorage.getFilmGenres(film.getId())));
         return popularFilms;
+    }
 
     public List<Film> getSearch(String query, String by) {
         query = "'%" + query.toLowerCase().replace("_", "\\_").replace("%", "\\%") + "%'";
