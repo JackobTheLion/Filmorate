@@ -165,6 +165,33 @@ public class FilmService {
         List<Film> popularFilms = filmStorage.getPopularFilms(count, genreId, year);
         popularFilms.forEach(film -> film.setGenres(genreStorage.getFilmGenres(film.getId())));
         return popularFilms;
+
+    public List<Film> getSearch(String query, String by) {
+        query = "'%" + query.toLowerCase().replace("_", "\\_").replace("%", "\\%") + "%'";
+        boolean hasTitle, hasDirector;
+        hasTitle = by.contains("title");
+        hasDirector = by.contains("director");
+
+        List<Film> searchList;
+        if (hasDirector && hasTitle) {
+            log.info("Returning search films. Title, director with text = {}", query);
+            searchList = filmStorage.getSearch("LOWER(f.name) LIKE " + query + " OR LOWER(d.name) LIKE " + query);
+        } else if (hasTitle) {
+            log.info("Returning search films. Title with text = {}", query);
+            searchList = filmStorage.getSearch("LOWER(f.name) LIKE " + query);
+        } else if (hasDirector) {
+            log.info("Returning search films. Director with text = {}", query);
+            searchList = filmStorage.getSearch("LOWER(d.name) LIKE " + query);
+        } else {
+            log.error("Parameter \"by\" not found by = {} ", by);
+            throw new NotFoundException("Parameter \"by\" is incorrect");
+        }
+
+        searchList.forEach(film -> enrichFilm(film));
+
+
+        return searchList;
+
     }
 
     private void setMpaToFilm(Film film) {
