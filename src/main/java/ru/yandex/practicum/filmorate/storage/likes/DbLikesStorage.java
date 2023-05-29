@@ -32,7 +32,6 @@ public class DbLikesStorage implements LikesStorage {
             log.info("Like from id {} to film {} added", userId, filmId);
         } catch (DataIntegrityViolationException e) {
             log.error("User with id {} or film with id {} not found", userId, filmId);
-            throw new NotFoundException(String.format("User with id %s or film with id %s not found", userId, filmId));
         }
     }
 

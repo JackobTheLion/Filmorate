@@ -89,8 +89,8 @@ public class FilmService {
             throw new IllegalArgumentException("FilmId and User Id must be more than zero");
         }
         log.info("Adding like from id {} to film id {}", userId, filmId);
-        likesStorage.addLike(filmId, userId);
         eventStorage.addEvent(userId, LIKE, ADD, filmId);
+        likesStorage.addLike(filmId, userId);
     }
 
     public void removeLike(Long filmId, Long userId) {
@@ -144,14 +144,6 @@ public class FilmService {
         return films;
     }
 
-    private Film enrichFilm(Film film) {
-        film.setGenres(genreStorage.getFilmGenres(film.getId()));
-        film.setLikes(likesStorage.getLikes(film.getId()).stream()
-                .map(f -> f.getUserId())
-                .collect(Collectors.toList()));
-        film.setDirectors(directorStorage.getDirectorsByFilm(film.getId()));
-        return film;
-    }
 
     public List<Film> getTopFilms(int count, long genreId, int year) {
         if (count <= 0) {
@@ -163,7 +155,7 @@ public class FilmService {
         }
         log.info("Looking most popular films with count: {}, genreId: {}, year: {}", count, genreId, year);
         List<Film> popularFilms = filmStorage.getPopularFilms(count, genreId, year);
-        popularFilms.forEach(film -> film.setGenres(genreStorage.getFilmGenres(film.getId())));
+        popularFilms.forEach(film -> enrichFilm(film));
         return popularFilms;
     }
 
@@ -190,9 +182,7 @@ public class FilmService {
 
         searchList.forEach(film -> enrichFilm(film));
 
-
         return searchList;
-
     }
 
     private void setMpaToFilm(Film film) {
@@ -217,6 +207,15 @@ public class FilmService {
             }
             film.getGenres().removeAll(duplicateGenres);
         }
+        return film;
+    }
+
+    private Film enrichFilm(Film film) {
+        film.setGenres(genreStorage.getFilmGenres(film.getId()));
+        film.setLikes(likesStorage.getLikes(film.getId()).stream()
+                .map(f -> f.getUserId())
+                .collect(Collectors.toList()));
+        film.setDirectors(directorStorage.getDirectorsByFilm(film.getId()));
         return film;
     }
 }
