@@ -24,37 +24,32 @@ public class ReviewController {
     }
 
     @PostMapping
-    public Review addReview(HttpServletRequest request, @NotNull @Valid @RequestBody Review review) {
-        log.info("Received a request to the endpoint: '{} {}', Request parameters: '{}'",
-                request.getMethod(), request.getRequestURI(), request.getQueryString());
+    public Review addReview(@NotNull @Valid @RequestBody Review review) {
+        log.info("Adding review {}", review);
         return reviewService.addReview(review);
     }
 
     @PutMapping
-    public Review putReview(HttpServletRequest request, @NotNull @Valid @RequestBody Review review) {
-        log.info("Received a request to the endpoint: '{} {}', Request parameters: '{}'",
-                request.getMethod(), request.getRequestURI(), request.getQueryString());
+    public Review putReview(@NotNull @Valid @RequestBody Review review) {
+        log.info("Updating review {}", review);
         return reviewService.putReview(review);
     }
 
     @DeleteMapping("/{id}")
-    public void deleteReview(HttpServletRequest request, @PathVariable Long id) {
-        log.info("Received a request to the endpoint: '{} {}', Request parameters: '{}'",
-                request.getMethod(), request.getRequestURI(), request.getQueryString());
+    public void deleteReview(@PathVariable Long id) {
+        log.info("Deleting review id {}", id);
         reviewService.deleteReview(id);
     }
 
     @GetMapping("{id}")
-    public Review getReview(HttpServletRequest request, @PathVariable Long id) {
-        log.info("Received a request to the endpoint: '{} {}', Request parameters: '{}'",
-                request.getMethod(), request.getRequestURI(), request.getQueryString());
+    public Review getReview(@PathVariable Long id) {
+        log.info("Looking for review id {}", id);
         return reviewService.getReview(id);
     }
 
     @GetMapping()
-    public List<Review> getFilmReviews(HttpServletRequest request, @RequestParam(required = false) Long filmId, @RequestParam(required = false, defaultValue = "10") Integer count) {
-        log.info("Received a request to the endpoint: '{} {}', Request parameters: '{}'",
-                request.getMethod(), request.getRequestURI(), request.getQueryString());
+    public List<Review> getFilmReviews(@RequestParam(required = false) Long filmId, @RequestParam(required = false, defaultValue = "10") Integer count) {
+        log.info("Looking for {} reviews of film id {}", count, filmId);
         if (filmId == null) {
             return reviewService.getReviews(count);
         } else {
@@ -63,30 +58,26 @@ public class ReviewController {
     }
 
     @PutMapping("/{id}/like/{userId}")
-    public void addLike(HttpServletRequest request, @PathVariable Long id, @PathVariable Long userId) {
-        log.info("Received a request to the endpoint: '{} {}', Request parameters: '{}'",
-                request.getMethod(), request.getRequestURI(), request.getQueryString());
+    public void addLike(@PathVariable Long id, @PathVariable Long userId) {
+        log.info("Adding like from user id {} to review id {}", userId, id );
         reviewService.addLike(id, userId);
     }
 
     @PutMapping("/{id}/dislike/{userId}")
-    public void addDislike(HttpServletRequest request, @PathVariable Long id, @PathVariable Long userId) {
-        log.info("Received a request to the endpoint: '{} {}', Request parameters: '{}'",
-                request.getMethod(), request.getRequestURI(), request.getQueryString());
+    public void addDislike(@PathVariable Long id, @PathVariable Long userId) {
+        log.info("Adding dislike from user id {} to review id {}", userId, id );
         reviewService.addDislike(id, userId);
     }
 
     @DeleteMapping("/{id}/like/{userId}")
-    public void deleteLike(HttpServletRequest request, @PathVariable Long id, @PathVariable Long userId) {
-        log.info("Received a request to the endpoint: '{} {}', Request parameters: '{}'",
-                request.getMethod(), request.getRequestURI(), request.getQueryString());
+    public void deleteLike(@PathVariable Long id, @PathVariable Long userId) {
+        log.info("Deleting like from user id {} to review id {}", userId, id );
         reviewService.deleteLike(id, userId);
     }
 
     @DeleteMapping("/{id}/dislike/{userId}")
-    public void deleteDislike(HttpServletRequest request, @PathVariable Long id, @PathVariable Long userId) {
-        log.info("Received a request to the endpoint: '{} {}', Request parameters: '{}'",
-                request.getMethod(), request.getRequestURI(), request.getQueryString());
+    public void deleteDislike(@PathVariable Long id, @PathVariable Long userId) {
+        log.info("Deleting dislike from user id {} to review id {}", userId, id );
         reviewService.deleteDislike(id, userId);
     }
 }
