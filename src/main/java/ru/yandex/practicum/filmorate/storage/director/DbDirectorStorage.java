@@ -9,13 +9,11 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.RequestBody;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 
-import javax.validation.Valid;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -72,7 +70,10 @@ public class DbDirectorStorage implements DirectorStorage {
         log.info("Update Director: {}", director);
         validation(director);
         String sql = "UPDATE director SET name = ? WHERE director_id = ?";
-        jdbcTemplate.update(sql, director.getName(), director.getId());
+        if ((jdbcTemplate.update(sql, director.getName(), director.getId()) <= 0)) {
+            log.error("Director with id {} not found", director.getId());
+            throw new NotFoundException(String.format("Director with id %s not found", director.getId()));
+        }
         return director;
     }
 
@@ -150,10 +151,10 @@ public class DbDirectorStorage implements DirectorStorage {
         );
     }
 
-    public void validation(@Valid @RequestBody Director director) {
-        if (director.getName() == null || director.getName().isBlank()) {
+    public void validation(Director director) {
+        if (director.getName().isBlank()) {
             log.error("director name is empty or contain blank");
-            throw new ValidationException("name of director can not be empty");
+            throw new ValidationException("Name of director can not be empty");
         }
     }
 
