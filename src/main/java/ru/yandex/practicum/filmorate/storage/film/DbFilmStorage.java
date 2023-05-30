@@ -86,6 +86,23 @@ public class DbFilmStorage implements FilmStorage {
     }
 
     @Override
+    public List<Film> getSearch(String sqlText) {
+        String sql = "SELECT f.*, m.* " +
+                "FROM films f " +
+                "LEFT JOIN mpa m ON f.mpa_id = m.mpa_id " +
+                "LEFT JOIN likes l ON l.film_id = f.film_id " +
+                "LEFT JOIN  film_directors fd ON f.film_id = fd.film_id " +
+                "LEFT JOIN director d ON fd.director_id = d.director_id " +
+                "WHERE " + sqlText +                     // Безопасная инъекция для упрощения жизни всем
+                // В сервис классе выполняется условие по параметрам которые ввёл пользователь,
+                // а в условии разработчик сам пишет какой sql код нужен в данный момент.
+                " GROUP BY f.film_id ORDER BY COUNT(l.user_id) DESC";
+        List<Film> films = jdbcTemplate.query(sql, (rs, rowNum) -> mapFilm(rs));
+        log.info("Number of search films: {}", films.size());
+        return films;
+    }
+
+    @Override
     public List<Film> getCommonFilms(Long userId, Long friendId) {
         String sql = "SELECT f.*, m.* " +
                 "FROM likes " +
@@ -96,6 +113,49 @@ public class DbFilmStorage implements FilmStorage {
 
         List<Film> films = jdbcTemplate.query(sql, (rs, rowNum) -> mapFilm(rs), userId, friendId);
         log.info("List of common films: {}", films.size());
+        return films;
+    }
+
+    @Override
+    public List<Film> getPopularFilms(Integer limit, Long genreId, Integer year) {
+        String sql;
+        List<Film> films;
+        if (genreId != 0 && year != 0) {
+            sql = "SELECT f.*, m.* " +
+                    "FROM films f " +
+                    "LEFT JOIN mpa m ON f.mpa_id = m.mpa_id " +
+                    "LEFT JOIN film_genre fg ON f.film_id = fg.film_id " +
+                    "LEFT JOIN genre g ON fg.genre_id = g.genre_id " +
+                    "LEFT JOIN likes l ON l.film_id = f.film_id " +
+                    "WHERE EXTRACT(YEAR FROM f.release_date) = ? AND g.genre_id = ? " +
+                    "GROUP BY f.film_id ORDER BY COUNT(l.user_id) DESC " +
+                    "LIMIT ?";
+            films = jdbcTemplate.query(sql, (rs, rowNum) -> mapFilm(rs), year, genreId, limit);
+        } else if (genreId == 0) {
+            sql = "SELECT f.*, m.* " +
+                    "FROM films f " +
+                    "LEFT JOIN mpa m ON f.mpa_id = m.mpa_id " +
+                    "LEFT JOIN film_genre fg ON f.film_id = fg.film_id " +
+                    "LEFT JOIN genre g ON fg.genre_id = g.genre_id " +
+                    "LEFT JOIN likes l ON l.film_id = f.film_id " +
+                    "WHERE EXTRACT(YEAR FROM f.release_date) = ?" +
+                    "GROUP BY f.film_id ORDER BY COUNT(l.user_id) DESC " +
+                    "LIMIT ?";
+            films = jdbcTemplate.query(sql, (rs, rowNum) -> mapFilm(rs), year, limit);
+        } else {
+            sql = "SELECT f.*, m.* " +
+                    "FROM films f " +
+                    "LEFT JOIN mpa m ON f.mpa_id = m.mpa_id " +
+                    "LEFT JOIN film_genre fg ON f.film_id = fg.film_id " +
+                    "LEFT JOIN genre g ON fg.genre_id = g.genre_id " +
+                    "LEFT JOIN likes l ON l.film_id = f.film_id " +
+                    "WHERE g.genre_id = ? " +
+                    "GROUP BY f.film_id ORDER BY COUNT(l.user_id) DESC " +
+                    "LIMIT ?";
+            films = jdbcTemplate.query(sql, (rs, rowNum) -> mapFilm(rs), genreId, limit);
+        }
+
+        log.info("Number of most populars films: {}", films.size());
         return films;
     }
 

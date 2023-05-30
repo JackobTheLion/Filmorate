@@ -89,8 +89,8 @@ public class FilmService {
             throw new IllegalArgumentException("FilmId and User Id must be more than zero");
         }
         log.info("Adding like from id {} to film id {}", userId, filmId);
-        likesStorage.addLike(filmId, userId);
         eventStorage.addEvent(userId, LIKE, ADD, filmId);
+        likesStorage.addLike(filmId, userId);
     }
 
     public void removeLike(Long filmId, Long userId) {
@@ -144,13 +144,45 @@ public class FilmService {
         return films;
     }
 
-    private Film enrichFilm(Film film) {
-        film.setGenres(genreStorage.getFilmGenres(film.getId()));
-        film.setLikes(likesStorage.getLikes(film.getId()).stream()
-                .map(f -> f.getUserId())
-                .collect(Collectors.toList()));
-        film.setDirectors(directorStorage.getDirectorsByFilm(film.getId()));
-        return film;
+
+    public List<Film> getTopFilms(int count, long genreId, int year) {
+        if (count <= 0) {
+            log.error("Count must be more than zero");
+            throw new IllegalArgumentException("Count must be more than zero");
+        }
+        if (genreId != 0) {
+            genreStorage.findGenre(genreId);
+        }
+        log.info("Looking most popular films with count: {}, genreId: {}, year: {}", count, genreId, year);
+        List<Film> popularFilms = filmStorage.getPopularFilms(count, genreId, year);
+        popularFilms.forEach(film -> enrichFilm(film));
+        return popularFilms;
+    }
+
+    public List<Film> getSearch(String query, String by) {
+        query = "'%" + query.toLowerCase().replace("_", "\\_").replace("%", "\\%") + "%'";
+        boolean hasTitle, hasDirector;
+        hasTitle = by.contains("title");
+        hasDirector = by.contains("director");
+
+        List<Film> searchList;
+        if (hasDirector && hasTitle) {
+            log.info("Returning search films. Title, director with text = {}", query);
+            searchList = filmStorage.getSearch("LOWER(f.name) LIKE " + query + " OR LOWER(d.name) LIKE " + query);
+        } else if (hasTitle) {
+            log.info("Returning search films. Title with text = {}", query);
+            searchList = filmStorage.getSearch("LOWER(f.name) LIKE " + query);
+        } else if (hasDirector) {
+            log.info("Returning search films. Director with text = {}", query);
+            searchList = filmStorage.getSearch("LOWER(d.name) LIKE " + query);
+        } else {
+            log.error("Parameter \"by\" not found by = {} ", by);
+            throw new NotFoundException("Parameter \"by\" is incorrect");
+        }
+
+        searchList.forEach(film -> enrichFilm(film));
+
+        return searchList;
     }
 
     private void setMpaToFilm(Film film) {
@@ -175,6 +207,15 @@ public class FilmService {
             }
             film.getGenres().removeAll(duplicateGenres);
         }
+        return film;
+    }
+
+    private Film enrichFilm(Film film) {
+        film.setGenres(genreStorage.getFilmGenres(film.getId()));
+        film.setLikes(likesStorage.getLikes(film.getId()).stream()
+                .map(f -> f.getUserId())
+                .collect(Collectors.toList()));
+        film.setDirectors(directorStorage.getDirectorsByFilm(film.getId()));
         return film;
     }
 }
