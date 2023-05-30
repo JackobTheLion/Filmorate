@@ -100,26 +100,19 @@ public class UserService {
     }
 
     public List<Film> recomendFilms(long userId) {
-        List<User> users = getUsers();
+        List<User> users = userStorage.getAllUsersWIthlikes();
         User currentUser = users.stream()
                 .filter(u -> u.getId() == userId)
                 .findFirst().get();
 
         users.remove(currentUser);
-        List<Likes> likes = likesStorage.getAllLikes();
-
-        List<Long> currentUserFilmsIds = likes.stream()
-                .filter(l -> l.getUserId() == userId)
-                .map(l -> l.getFilmId())
-                .collect(Collectors.toList());
+        List<Long> currentUserFilmsIds = currentUser.getLikes();
 
         int count = 0;//max возможное пересечение
         List<Long> filmIdsBuffer = new ArrayList<>();
         for (User user : users) {
-            List<Long> userFilmsIds = likes.stream()//получаем список фильмов кот like user из списка
-                    .filter(l -> l.getUserId() == user.getId())
-                    .map(l -> l.getFilmId())
-                    .collect(Collectors.toList());
+            List<Long> userFilmsIds = user.getLikes();
+
             int currentCount = (int) currentUserFilmsIds.stream() // текущий счетчик пересечения
                     .filter(userFilmsIds::contains)
                     .count();

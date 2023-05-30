@@ -13,7 +13,10 @@ import ru.yandex.practicum.filmorate.model.User;
 import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Component
 @Qualifier("dbStorage")
@@ -65,6 +68,20 @@ public class DbUserStorage implements UserStorage {
     }
 
     @Override
+    public List<User> getAllUsersWIthlikes() {
+        String sql = "SELECT u.user_id, u.email, u.login, u.name, u.birthday, " +
+                "GROUP_CONCAT(l.film_id SEPARATOR ',') AS likeIds " +
+                "FROM filmorate_users u " +
+                "LEFT JOIN likes l ON u.user_id = l.user_id " +
+                "GROUP BY u.user_id";
+
+        List<User> users = jdbcTemplate.query(sql, (rs, rowNum) -> mapUserWithLike(rs));
+        log.info("Number of users registered: {}", users.size());
+        return users;
+    }
+
+
+    @Override
     public User findUser(Long id) {
         log.info("Looking for user: {}", id);
         String sql = "SELECT * FROM filmorate_users WHERE user_id = ?";
@@ -98,5 +115,18 @@ public class DbUserStorage implements UserStorage {
                 .name(rs.getString("name"))
                 .birthday(rs.getDate("birthday").toLocalDate())
                 .build();
+    }
+
+    private User mapUserWithLike(ResultSet rs) throws SQLException {
+        List<Long> likeIds = new ArrayList<>();
+        if (rs.getString("likeIds") != null) {
+            String[] likeIdsArray = rs.getString("likeIds").split(",");
+            for (String likeId : likeIdsArray) {
+                likeIds.add(Long.parseLong(likeId));
+            }
+        }
+        var user = mapUser(rs);
+        user.setLikes(likeIds);
+        return user;
     }
 }
