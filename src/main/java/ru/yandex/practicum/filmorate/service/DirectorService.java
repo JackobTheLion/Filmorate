@@ -44,15 +44,11 @@ public class DirectorService {
 
     public void deleteDirector(Long id) {
         log.info("Delete director {}", id);
-        // проверяем что директор с id существует
-        directorStorage.getDirector(id);
         directorStorage.deleteDirector(id);
     }
 
     public Director updateDirector(Director director) {
         log.info("Update director {}", director);
-        // проверяем что директор с id существует
-        directorStorage.getDirector(director.getId());
         return directorStorage.updateDirector(director);
     }
 }

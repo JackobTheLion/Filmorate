@@ -43,12 +43,12 @@ public class DbReviewStorage implements ReviewStorage {
                 return stmt;
             }, keyHolder);
         } catch (DataIntegrityViolationException e) {
-            log.debug("Class: {}. Method: addReview. Obj: {}. Status: Failed", DbReviewStorage.class, review);
+            log.debug("User with id {} or film with id {} was not found", review.getUserId(), review.getFilmId());
             throw new NotFoundException(String.format("User with id %s or film with id %s was not found", review.getUserId(), review.getFilmId()));
         }
 
         review.setReviewId(keyHolder.getKey().longValue());
-        log.debug("Class: {}. Method: addReview. Obj: {}. Status: Success", DbReviewStorage.class, review);
+        log.debug("Review added: {}", review);
         return review;
     }
 
@@ -64,31 +64,29 @@ public class DbReviewStorage implements ReviewStorage {
         );
 
         if (affectedRows == 0) {
-            log.debug("Class: {}. Method: updateReview. Obj: {}. Status: Failed", DbReviewStorage.class, review);
+            log.debug("Review with id {} not found", review.getReviewId());
             throw new NotFoundException(String.format("Review with id %s was not found", review.getReviewId()));
         }
 
-        log.debug("Class: {}. Method: updateReview. Obj: {}. Status: Success", DbReviewStorage.class, review);
+        log.debug("Review with id {} updated", review.getReviewId());
         return this.getReview(review.getReviewId());
     }
 
     @Override
     public void deleteReview(Long id) {
         String sql = "DELETE FROM REVIEW WHERE REVIEW_ID = ?";
-
         var affectedRows = jdbcTemplate.update(sql, id);
-
         if (affectedRows == 0) {
-            log.debug("Class: {}. Method: deleteReview. Id: {}. Status: Failed", DbReviewStorage.class, id);
+            log.debug("Review with id {} was not found", id);
             throw new NotFoundException(String.format("Review with id %s was not found", id));
         }
-
-        log.debug("Class: {}. Method: deleteReview. Id: {}. Status: Success", DbReviewStorage.class, id);
+        log.debug("Review id {} deleted", id);
     }
 
     @Override
     public Review getReview(Long id) {
-        String sql = "SELECT REVIEW.REVIEW_ID, REVIEW.CONTENT, REVIEW.IS_POSITIVE, REVIEW.USER_ID, REVIEW.FILM_ID, CASE WHEN REVIEW_LIKE.rating IS NULL THEN 0 ELSE REVIEW_LIKE.rating END AS useful " +
+        String sql = "SELECT REVIEW.REVIEW_ID, REVIEW.CONTENT, REVIEW.IS_POSITIVE, REVIEW.USER_ID, REVIEW.FILM_ID, " +
+                "CASE WHEN REVIEW_LIKE.rating IS NULL THEN 0 ELSE REVIEW_LIKE.rating END AS useful " +
                 "FROM REVIEW " +
                 "LEFT JOIN ( " +
                 "SELECT REVIEW_ID, sum(CASE WHEN IS_LIKED  THEN 1 ELSE -1 END) AS rating " +
@@ -102,17 +100,18 @@ public class DbReviewStorage implements ReviewStorage {
                 .collect(Collectors.toList());
 
         if (queryResult.size() == 0) {
-            log.debug("Class: {}. Method: getReview. Id: {}. Status: Failed", DbReviewStorage.class, id);
+            log.debug("Review with id {} was not found", id);
             throw new NotFoundException(String.format("Review with id %s was not found", id));
         } else {
-            log.debug("Class: {}. Method: getReview. Id: {}. Status: Success", DbReviewStorage.class, id);
+            log.debug("Review found {}.", queryResult.get(0));
             return queryResult.get(0);
         }
     }
 
     @Override
     public List<Review> getFilmReviews(Long filmId, Integer count) {
-        String sql = "SELECT REVIEW.REVIEW_ID, REVIEW.CONTENT, REVIEW.IS_POSITIVE, REVIEW.USER_ID, REVIEW.FILM_ID, CASE WHEN REVIEW_LIKE.rating IS NULL THEN 0 ELSE REVIEW_LIKE.rating END AS useful " +
+        String sql = "SELECT REVIEW.REVIEW_ID, REVIEW.CONTENT, REVIEW.IS_POSITIVE, REVIEW.USER_ID, REVIEW.FILM_ID, " +
+                "CASE WHEN REVIEW_LIKE.rating IS NULL THEN 0 ELSE REVIEW_LIKE.rating END AS useful " +
                 "FROM REVIEW " +
                 "LEFT JOIN ( " +
                 "SELECT REVIEW_ID, sum(CASE WHEN IS_LIKED  THEN 1 ELSE -1 END) AS rating " +
@@ -127,13 +126,14 @@ public class DbReviewStorage implements ReviewStorage {
                 .stream()
                 .collect(Collectors.toList());
 
-        log.debug("Class: {}. Method: getFilmReviews. FilmId: {}. Count: {}. Status: Success", DbReviewStorage.class, filmId, count);
+        log.debug("Found {} reviews of film id {}", queryResult.size(), filmId);
         return queryResult;
     }
 
     @Override
     public List<Review> getReviews(Integer count) {
-        String sql = "SELECT REVIEW.REVIEW_ID, REVIEW.CONTENT, REVIEW.IS_POSITIVE, REVIEW.USER_ID, REVIEW.FILM_ID, CASE WHEN REVIEW_LIKE.rating IS NULL THEN 0 ELSE REVIEW_LIKE.rating END AS useful " +
+        String sql = "SELECT REVIEW.REVIEW_ID, REVIEW.CONTENT, REVIEW.IS_POSITIVE, REVIEW.USER_ID, REVIEW.FILM_ID, " +
+                "CASE WHEN REVIEW_LIKE.rating IS NULL THEN 0 ELSE REVIEW_LIKE.rating END AS useful " +
                 "FROM REVIEW " +
                 "LEFT JOIN ( " +
                 "SELECT REVIEW_ID, sum(CASE WHEN IS_LIKED  THEN 1 ELSE -1 END) AS rating " +
@@ -147,21 +147,19 @@ public class DbReviewStorage implements ReviewStorage {
                 .stream()
                 .collect(Collectors.toList());
 
-        log.debug("Class: {}. Method: getReviews. Count: {}. Status: Success", DbReviewStorage.class, count);
+        log.debug("Found {} reviews", queryResult.size());
         return queryResult;
     }
 
     public void addReviewLiking(Long reviewId, Long userId, Boolean isLiked) {
-
         String sql = "INSERT INTO REVIEW_LIKE " +
                 "(USER_ID, REVIEW_ID, IS_LIKED) " +
                 "VALUES (?, ?, ?)";
-
         try {
             jdbcTemplate.update(sql, userId, reviewId, isLiked);
-            log.debug("Class: {}. Method: addReviewLiking. ReviewId: {}. UserId: {}. Status: Success", DbReviewStorage.class, reviewId, userId);
+            log.debug("Adding like from user {} to review {}", userId, reviewId);
         } catch (DataIntegrityViolationException e) {
-            log.debug("Class: {}. Method: addReviewLiking. ReviewId: {}. UserId: {}. Status: Failed", DbReviewStorage.class, reviewId, userId);
+            log.debug("User with id {} or review with id {} was not found", userId, reviewId);
             throw new NotFoundException(String.format("User with id %s or review with id %s was not found", userId, reviewId));
         }
     }
@@ -170,15 +168,12 @@ public class DbReviewStorage implements ReviewStorage {
     public void deleteReviewLiking(Long reviewId, Long userId) {
         String sql = "DELETE FROM REVIEW_LIKE " +
                 "WHERE REVIEW_ID = ? and USER_ID = ?";
-
         var affectedRows = jdbcTemplate.update(sql, reviewId, userId);
-
         if (affectedRows == 0) {
-            log.debug("Class: {}. Method: deleteReviewLiking. ReviewId: {}. UserId: {}. Status: Failed", DbReviewStorage.class, reviewId, userId);
+            log.debug("User with id {} or review with id {} was not found", userId, reviewId);
             throw new NotFoundException(String.format("User with id %s or review with id %s was not found", userId, reviewId));
         }
-
-        log.debug("Class: {}. Method: deleteReviewLiking. ReviewId: {}. UserId: {}. Status: Success", DbReviewStorage.class, reviewId, userId);
+        log.debug("Like from user id {} to review id {} deleted", userId, reviewId);
     }
 
     private Review mapRowToReview(ResultSet rs) throws SQLException {
