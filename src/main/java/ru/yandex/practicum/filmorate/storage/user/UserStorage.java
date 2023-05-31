@@ -12,4 +12,8 @@ public interface UserStorage {
     List<User> getUsers();
 
     User findUser(Long id);
+
+    void deleteUser(Long id);
+
+    List<User> getAllUsersWIthlikes();
 }

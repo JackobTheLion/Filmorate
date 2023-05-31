@@ -5,6 +5,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
@@ -24,10 +26,12 @@ import java.util.List;
 public class DbFilmStorage implements FilmStorage {
 
     private final JdbcTemplate jdbcTemplate;
+    private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
     @Autowired
     public DbFilmStorage(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
+        this.namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(jdbcTemplate);
     }
 
     @Override
@@ -82,6 +86,80 @@ public class DbFilmStorage implements FilmStorage {
     }
 
     @Override
+    public List<Film> getSearch(String sqlText) {
+        String sql = "SELECT f.*, m.* " +
+                "FROM films f " +
+                "LEFT JOIN mpa m ON f.mpa_id = m.mpa_id " +
+                "LEFT JOIN likes l ON l.film_id = f.film_id " +
+                "LEFT JOIN  film_directors fd ON f.film_id = fd.film_id " +
+                "LEFT JOIN director d ON fd.director_id = d.director_id " +
+                "WHERE " + sqlText +                     // Безопасная инъекция для упрощения жизни всем
+                // В сервис классе выполняется условие по параметрам которые ввёл пользователь,
+                // а в условии разработчик сам пишет какой sql код нужен в данный момент.
+                " GROUP BY f.film_id ORDER BY COUNT(l.user_id) DESC";
+        List<Film> films = jdbcTemplate.query(sql, (rs, rowNum) -> mapFilm(rs));
+        log.info("Number of search films: {}", films.size());
+        return films;
+    }
+
+    @Override
+    public List<Film> getCommonFilms(Long userId, Long friendId) {
+        String sql = "SELECT f.*, m.* " +
+                "FROM likes " +
+                "JOIN likes l ON l.film_id = likes.film_id " +
+                "JOIN films f on f.film_id = l.film_id " +
+                "JOIN mpa m on f.mpa_id = m.mpa_id " +
+                "WHERE l.user_id = ? AND likes.user_id = ?";
+
+        List<Film> films = jdbcTemplate.query(sql, (rs, rowNum) -> mapFilm(rs), userId, friendId);
+        log.info("List of common films: {}", films.size());
+        return films;
+    }
+
+    @Override
+    public List<Film> getPopularFilms(Integer limit, Long genreId, Integer year) {
+        String sql;
+        List<Film> films;
+        if (genreId != 0 && year != 0) {
+            sql = "SELECT f.*, m.* " +
+                    "FROM films f " +
+                    "LEFT JOIN mpa m ON f.mpa_id = m.mpa_id " +
+                    "LEFT JOIN film_genre fg ON f.film_id = fg.film_id " +
+                    "LEFT JOIN genre g ON fg.genre_id = g.genre_id " +
+                    "LEFT JOIN likes l ON l.film_id = f.film_id " +
+                    "WHERE EXTRACT(YEAR FROM f.release_date) = ? AND g.genre_id = ? " +
+                    "GROUP BY f.film_id ORDER BY COUNT(l.user_id) DESC " +
+                    "LIMIT ?";
+            films = jdbcTemplate.query(sql, (rs, rowNum) -> mapFilm(rs), year, genreId, limit);
+        } else if (genreId == 0) {
+            sql = "SELECT f.*, m.* " +
+                    "FROM films f " +
+                    "LEFT JOIN mpa m ON f.mpa_id = m.mpa_id " +
+                    "LEFT JOIN film_genre fg ON f.film_id = fg.film_id " +
+                    "LEFT JOIN genre g ON fg.genre_id = g.genre_id " +
+                    "LEFT JOIN likes l ON l.film_id = f.film_id " +
+                    "WHERE EXTRACT(YEAR FROM f.release_date) = ?" +
+                    "GROUP BY f.film_id ORDER BY COUNT(l.user_id) DESC " +
+                    "LIMIT ?";
+            films = jdbcTemplate.query(sql, (rs, rowNum) -> mapFilm(rs), year, limit);
+        } else {
+            sql = "SELECT f.*, m.* " +
+                    "FROM films f " +
+                    "LEFT JOIN mpa m ON f.mpa_id = m.mpa_id " +
+                    "LEFT JOIN film_genre fg ON f.film_id = fg.film_id " +
+                    "LEFT JOIN genre g ON fg.genre_id = g.genre_id " +
+                    "LEFT JOIN likes l ON l.film_id = f.film_id " +
+                    "WHERE g.genre_id = ? " +
+                    "GROUP BY f.film_id ORDER BY COUNT(l.user_id) DESC " +
+                    "LIMIT ?";
+            films = jdbcTemplate.query(sql, (rs, rowNum) -> mapFilm(rs), genreId, limit);
+        }
+
+        log.info("Number of most populars films: {}", films.size());
+        return films;
+    }
+
+    @Override
     public Film findFilm(Long id) {
         log.info("Looking for film: {}", id);
         String sql = "SELECT * FROM films f JOIN mpa m ON f.mpa_id = m.mpa_id WHERE film_id = ?";
@@ -94,6 +172,25 @@ public class DbFilmStorage implements FilmStorage {
             throw new FilmNotFoundException(String.format("Film wth id %s not found", id));
         }
         return film;
+    }
+
+    @Override
+    public List<Film> findAllFilmsByIds(List<Long> ids) {
+        var sqlQuery = "SELECT * FROM films f LEFT JOIN mpa m ON f.mpa_id = m.mpa_id WHERE film_id IN (:ids)";
+        var idsParams = new MapSqlParameterSource("ids", ids);
+        return namedParameterJdbcTemplate.query(sqlQuery, idsParams, (rs, rowNum) -> mapFilm(rs));
+    }
+
+    @Override
+    public void deleteFilm(Long id) {
+        String sql = "DELETE from films WHERE film_id = ?";
+        int result = jdbcTemplate.update(sql, id);
+        if (result == 1) {
+            log.info("Film with id {} deleted", id);
+        } else {
+            log.info("Film with id {} not found", id);
+            throw new FilmNotFoundException(String.format("Film with id %s not found", id));
+        }
     }
 
     private Film mapFilm(ResultSet rs) throws SQLException {

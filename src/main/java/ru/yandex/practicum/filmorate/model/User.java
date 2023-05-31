@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -11,9 +10,8 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Past;
 import java.time.LocalDate;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 @Data
 @AllArgsConstructor
@@ -28,8 +26,7 @@ public class User {
     private String name;
     @Past
     private final LocalDate birthday;
-    @JsonIgnore
-    private final Set<Long> friends = new HashSet<>();
+    private List<Long> likes;//список айди фильмов которые лайкнул пользователь
 
     public Map<String, Object> toMap() {
         Map<String, Object> values = new HashMap<>();
