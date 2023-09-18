@@ -122,8 +122,12 @@ public class UserService {
         }
         List<Long> recommendedFilmsIds = filmIdsBuffer.stream()
                 .filter(newUserFilmId -> currentUserFilmsIds.stream()
-                        .noneMatch(userFilmId -> newUserFilmId == userFilmId))
+                        .noneMatch(newUserFilmId::equals))
                 .collect(Collectors.toList());
+
+        if (recommendedFilmsIds.isEmpty()) {
+            return new ArrayList<>();
+        }
 
         var recommendedFilms = filmStorage.findAllFilmsByIds(recommendedFilmsIds);
         for (Film film : recommendedFilms) {

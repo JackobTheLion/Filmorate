@@ -69,7 +69,7 @@ public class DbFilmStorage implements FilmStorage {
 
     @Override
     public List<Film> getFilms() {
-        String sql = "SELECT * FROM films f LEFT JOIN mpa m ON f.mpa_id = m.mpa_id";
+        String sql = "SELECT * FROM films f LEFT JOIN mpa m ON f.mpa_id = m.mpa_id ORDER BY f.film_id";
         List<Film> films = jdbcTemplate.query(sql, (rs, rowNum) -> mapFilm(rs));
         log.info("Number of films registered: {}", films.size());
         return films;
@@ -79,7 +79,7 @@ public class DbFilmStorage implements FilmStorage {
     public List<Film> getPopularFilms(Integer limit) {
         String sql = "SELECT f.film_id, f.name, f.description, f.release_date, f.duration, m.mpa_id, m.mpa FROM films f " +
                 "LEFT JOIN mpa m ON f.mpa_id = m.mpa_id " +
-                "LEFT JOIN likes l ON l.film_id = f.film_id GROUP BY f.film_id ORDER BY COUNT(l.user_id) DESC LIMIT ?";
+                "LEFT JOIN likes l ON l.film_id = f.film_id GROUP BY f.film_id, m.mpa_id ORDER BY COUNT(l.user_id) DESC LIMIT ?";
         List<Film> films = jdbcTemplate.query(sql, (rs, rowNum) -> mapFilm(rs), limit);
         log.info("Number of top films: {}", films.size());
         return films;
@@ -96,7 +96,7 @@ public class DbFilmStorage implements FilmStorage {
                 "WHERE " + sqlText +                     // Безопасная инъекция для упрощения жизни всем
                 // В сервис классе выполняется условие по параметрам которые ввёл пользователь,
                 // а в условии разработчик сам пишет какой sql код нужен в данный момент.
-                " GROUP BY f.film_id ORDER BY COUNT(l.user_id) DESC";
+                " GROUP BY f.film_id, m.mpa_id ORDER BY COUNT(l.user_id) DESC";
         List<Film> films = jdbcTemplate.query(sql, (rs, rowNum) -> mapFilm(rs));
         log.info("Number of search films: {}", films.size());
         return films;
@@ -128,7 +128,7 @@ public class DbFilmStorage implements FilmStorage {
                     "LEFT JOIN genre g ON fg.genre_id = g.genre_id " +
                     "LEFT JOIN likes l ON l.film_id = f.film_id " +
                     "WHERE EXTRACT(YEAR FROM f.release_date) = ? AND g.genre_id = ? " +
-                    "GROUP BY f.film_id ORDER BY COUNT(l.user_id) DESC " +
+                    "GROUP BY f.film_id, m.mpa_id ORDER BY COUNT(l.user_id) DESC " +
                     "LIMIT ?";
             films = jdbcTemplate.query(sql, (rs, rowNum) -> mapFilm(rs), year, genreId, limit);
         } else if (genreId == 0) {
@@ -139,7 +139,7 @@ public class DbFilmStorage implements FilmStorage {
                     "LEFT JOIN genre g ON fg.genre_id = g.genre_id " +
                     "LEFT JOIN likes l ON l.film_id = f.film_id " +
                     "WHERE EXTRACT(YEAR FROM f.release_date) = ?" +
-                    "GROUP BY f.film_id ORDER BY COUNT(l.user_id) DESC " +
+                    "GROUP BY f.film_id, m.mpa_id ORDER BY COUNT(l.user_id) DESC " +
                     "LIMIT ?";
             films = jdbcTemplate.query(sql, (rs, rowNum) -> mapFilm(rs), year, limit);
         } else {
@@ -150,7 +150,7 @@ public class DbFilmStorage implements FilmStorage {
                     "LEFT JOIN genre g ON fg.genre_id = g.genre_id " +
                     "LEFT JOIN likes l ON l.film_id = f.film_id " +
                     "WHERE g.genre_id = ? " +
-                    "GROUP BY f.film_id ORDER BY COUNT(l.user_id) DESC " +
+                    "GROUP BY f.film_id, m.mpa_id ORDER BY COUNT(l.user_id) DESC " +
                     "LIMIT ?";
             films = jdbcTemplate.query(sql, (rs, rowNum) -> mapFilm(rs), genreId, limit);
         }
