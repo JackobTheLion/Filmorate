@@ -28,14 +28,14 @@ public class DbReviewStorage implements ReviewStorage {
     @Override
     public Review addReview(Review review) {
 
-        String sql = "INSERT INTO REVIEW (REVIEW_ID, CONTENT, IS_POSITIVE, USER_ID, FILM_ID) " +
-                "VALUES ((SELECT(COALESCE(MAX(REVIEW_ID), 0) + 1) FROM REVIEW),?,?,?,?);";
+        String sql = "INSERT INTO REVIEW (CONTENT, IS_POSITIVE, USER_ID, FILM_ID) " +
+                "VALUES (?,?,?,?);";
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
         try {
             jdbcTemplate.update(connection -> {
-                PreparedStatement stmt = connection.prepareStatement(sql, new String[]{"REVIEW_ID"});
+                PreparedStatement stmt = connection.prepareStatement(sql, new String[]{"review_id"});
                 stmt.setString(1, review.getContent());
                 stmt.setBoolean(2, review.getIsPositive());
                 stmt.setLong(3, review.getUserId());
@@ -89,7 +89,7 @@ public class DbReviewStorage implements ReviewStorage {
                 "CASE WHEN REVIEW_LIKE.rating IS NULL THEN 0 ELSE REVIEW_LIKE.rating END AS useful " +
                 "FROM REVIEW " +
                 "LEFT JOIN ( " +
-                "SELECT REVIEW_ID, sum(CASE WHEN IS_LIKED  THEN 1 ELSE -1 END) AS rating " +
+                "SELECT REVIEW_ID, sum(CASE WHEN IS_LIKED THEN 1 ELSE -1 END) AS rating " +
                 "FROM REVIEW_LIKE " +
                 "GROUP BY REVIEW_ID) AS REVIEW_LIKE " +
                 "ON REVIEW.REVIEW_ID = REVIEW_LIKE.REVIEW_ID " +
@@ -179,11 +179,11 @@ public class DbReviewStorage implements ReviewStorage {
     private Review mapRowToReview(ResultSet rs) throws SQLException {
         return Review
                 .builder()
-                .reviewId(rs.getLong("review.REVIEW_ID"))
-                .content(rs.getString("review.content"))
-                .isPositive(rs.getBoolean("review.IS_POSITIVE"))
-                .userId(rs.getLong("review.USER_ID"))
-                .filmId(rs.getLong("review.FILM_ID"))
+                .reviewId(rs.getLong("review_id"))
+                .content(rs.getString("content"))
+                .isPositive(rs.getBoolean("is_positive"))
+                .userId(rs.getLong("user_id"))
+                .filmId(rs.getLong("film_id"))
                 .useful(rs.getInt("useful"))
                 .build();
     }

@@ -10,11 +10,14 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exceptions.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 
+import java.sql.Array;
 import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 @Qualifier("dbStorage")
@@ -43,7 +46,7 @@ public class DbUserStorage implements UserStorage {
                 "email = ?, " +
                 "login = ?, " +
                 "name = ?, " +
-                "birthday = ?" +
+                "birthday = ? " +
                 "WHERE user_id = ?";
         if (jdbcTemplate.update(sql,
                 user.getEmail(),
@@ -68,7 +71,7 @@ public class DbUserStorage implements UserStorage {
     @Override
     public List<User> getAllUsersWIthlikes() {
         String sql = "SELECT u.user_id, u.email, u.login, u.name, u.birthday, " +
-                "GROUP_CONCAT(l.film_id SEPARATOR ',') AS likeIds " +
+                "string_agg(l.film_id::varchar, ',') AS likeIds " +
                 "FROM filmorate_users u " +
                 "LEFT JOIN likes l ON u.user_id = l.user_id " +
                 "GROUP BY u.user_id";
