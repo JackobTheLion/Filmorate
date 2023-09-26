@@ -1,104 +1,43 @@
-# java-filmorate
+# :handshake: Filmorate
 
-Java filmorate DB scheme
+### :question: Что это?
+Бэкенд простого приложения - аналога IMDB.
 
-<img src="image/ERDB.png">
+### :star: Возможности приложения:
+* Добавление и удаление пользователей, фильмов
+* Просмотр информации о пользователях и фильмах
+* Добавление и удаление лайков фильмам
+* Добавление и удаление из друзей
+* Получения списка рекомендованных фильмов на основе лайков друзей 
 
-## Samples of requests:
-
-### Get all films:
-
-~~~
-SELECT *
-FROM films;
-~~~
-
-### Get all users
-
-~~~
-SELECT *
-FROM users;
-~~~
-
-### Get films liked by user
-
-~~~
-SELECT *
-FROM films
-WHERE film_id IN 
-(
-    SELECT film_id
-    FROM likes
-    WHERE user_id = {id}
-);
-~~~
-
-### Get common friends
-
-~~~
-SELECT *
-FROM users AS u
-WHERE ((u.user_id IN
-(
-    SELECT user2_id
-    FROM friends
-    WHERE user1_id = {id1} AND confirmed = true
-)) OR (u.user_id IN (
-    SELECT user1_id
-    FROM friends
-    WHERE user2_id = {id1} AND confirmed = true
-)))
-AND ((u.user_id IN (
-    SELECT user2_id
-    FROM friends
-    WHERE user1_id = {id2} AND confirmed = true
-)) OR (u.user_id IN (
-    SELECT user1_id
-    FROM friends
-    WHERE user2_id = {id2} AND confirmed = true
-)));
-~~~
-
-### Get top liked films
-
-~~~
-SELECT f.name,
-COUNT(l.film_id) AS likes_number
-FROM likes AS l
-LEFT JOIN films AS f ON f.film_id = l.film_id
-GROUP BY f.name
-ORDER BY likes_number DESC
-LIMIT {count};
-~~~
-
-### Find user
-
-~~~
-SELECT *
-FROM users
-WHERE user_id = {id}
-~~~
-
-### Find film
-
-~~~
-SELECT *
-FROM films
-WHERE film_id = {id}
-~~~
-
-### Find friends
-
-~~~
-SELECT *
-FROM users
-WHERE user_id IN (
-    SELECT user2_id
-    FROM friends
-    WHERE user1_id = {id} AND confirmed = true
-) OR user_id IN (
-    SELECT user1_id
-    FROM friends
-    WHERE user2_id = {id} AND confirmed = true
-);
-~~~
+___
+### :globe_with_meridians: Описание API приложения:
+Описание API сервера [здесь](api). \
+Тесты Postman [здесь](postman).
+___
+### :gear: Технологический стек
+* Java 11
+* Spring Boot
+* JDBC
+* Junit
+* Lombok
+* PostgresSQL
+* Maven
+* Docker
+___
+### :page_with_curl: Инструкция по запуску:
+1. Скачать проект
+2. По умолчанию приложение работает на порту 8080
+3. Собрать проект:
+```shell
+docker compose build
+```
+4. Запустить проект:
+```shell
+docker compose up
+```
+___
+### :man_technologist: TODO
+- [ ] добавить возможность прикреплять постер фильма
+- [ ] изменить лайки на оценки
+- [ ] улучшить алгоритм рекомендаций
